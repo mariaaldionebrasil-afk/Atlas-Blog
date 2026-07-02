@@ -3,21 +3,28 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import Breadcrumb from "../../../components/Breadcrumb";
 import AuthorBio from "../../../components/AuthorBio";
-import { reviews } from "../../../lib/mock-data";
 import siteConfig from "../../../config/site.config";
+import { prisma } from "../../../lib/prisma";
+import { mapReview } from "../../../lib/mappers";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const reviews = await prisma.review.findMany({ select: { slug: true } });
   return reviews.map((r) => ({ slug: r.slug }));
 }
 
 export default async function ReviewPage({ params }: Props) {
   const { slug } = await params;
-  const review = reviews.find((r) => r.slug === slug);
-  if (!review) notFound();
+  const dbReview = await prisma.review.findUnique({
+    where: { slug },
+    include: { author: true },
+  });
+  if (!dbReview) notFound();
+
+  const review = mapReview(dbReview);
 
   const crumbs = [
     { label: "Home", href: "/" },
@@ -40,24 +47,17 @@ export default async function ReviewPage({ params }: Props) {
           </span>
           <span className="text-gray-500 text-sm">{review.rating}/5</span>
         </div>
-        <p className="mt-4 text-lg text-gray-600 border-l-4 border-amber-200 pl-4 italic">
-          {review.summary}
-        </p>
-
+        <p className="mt-4 text-lg text-gray-600 border-l-4 border-amber-200 pl-4 italic">{review.summary}</p>
         <article className="mt-8 space-y-4 text-gray-700 leading-relaxed">
-          {review.content.split("\n\n").map((paragraph, i) => (
-            <p key={i}>{paragraph}</p>
-          ))}
+          {review.content.split("\n\n").map((paragraph, i) => <p key={i}>{paragraph}</p>)}
         </article>
-
         <div className="mt-10 grid sm:grid-cols-2 gap-6">
           <div className="bg-green-50 border border-green-200 rounded-lg p-5">
             <h2 className="font-semibold text-green-800 mb-3">Prós</h2>
             <ul className="space-y-2">
               {review.pros.map((pro, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-green-700">
-                  <span className="mt-0.5">✓</span>
-                  <span>{pro}</span>
+                  <span className="mt-0.5">✓</span><span>{pro}</span>
                 </li>
               ))}
             </ul>
@@ -67,8 +67,7 @@ export default async function ReviewPage({ params }: Props) {
             <ul className="space-y-2">
               {review.cons.map((con, i) => (
                 <li key={i} className="flex items-start gap-2 text-sm text-red-700">
-                  <span className="mt-0.5">✗</span>
-                  <span>{con}</span>
+                  <span className="mt-0.5">✗</span><span>{con}</span>
                 </li>
               ))}
             </ul>

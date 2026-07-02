@@ -3,25 +3,31 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import PostCard from "../../../components/PostCard";
 import Breadcrumb from "../../../components/Breadcrumb";
-import { posts, categories } from "../../../lib/mock-data";
 import siteConfig from "../../../config/site.config";
+import { prisma } from "../../../lib/prisma";
+import { mapPost } from "../../../lib/mappers";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const categories = await prisma.category.findMany({ select: { slug: true } });
   return categories.map((c) => ({ slug: c.slug }));
 }
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const category = categories.find((c) => c.slug === slug);
+  const category = await prisma.category.findUnique({ where: { slug } });
   if (!category) notFound();
 
-  const filtered = posts
-    .filter((p) => p.category === slug)
-    .sort((a, b) => (a.publishedDate < b.publishedDate ? 1 : -1));
+  const dbPosts = await prisma.post.findMany({
+    where: { category: { slug } },
+    include: { author: true, category: true },
+    orderBy: { publishedDate: "desc" },
+  });
+
+  const posts = dbPosts.map(mapPost);
 
   const crumbs = [
     { label: "Home", href: "/" },
@@ -35,18 +41,12 @@ export default async function CategoryPage({ params }: Props) {
       <main className="flex-1 mx-auto max-w-5xl px-4 py-10 w-full">
         <Breadcrumb crumbs={crumbs} />
         <h1 className="mt-4 text-3xl font-bold text-gray-900">{category.name}</h1>
-        {category.description && (
-          <p className="mt-2 text-gray-500">{category.description}</p>
-        )}
-        <p className="mt-1 text-sm text-gray-400">{filtered.length} artigo(s)</p>
+        {category.description && <p className="mt-2 text-gray-500">{category.description}</p>}
+        <p className="mt-1 text-sm text-gray-400">{posts.length} artigo(s)</p>
         <div className="mt-8 grid gap-6 sm:grid-cols-2">
-          {filtered.map((post) => (
-            <PostCard key={post.slug} post={post} />
-          ))}
+          {posts.map((post) => <PostCard key={post.slug} post={post} />)}
         </div>
-        {filtered.length === 0 && (
-          <p className="mt-8 text-gray-500">Nenhum artigo nesta categoria ainda.</p>
-        )}
+        {posts.length === 0 && <p className="mt-8 text-gray-500">Nenhum artigo nesta categoria ainda.</p>}
       </main>
       <Footer config={siteConfig} />
     </>

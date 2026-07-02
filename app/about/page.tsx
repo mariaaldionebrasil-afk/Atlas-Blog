@@ -1,22 +1,24 @@
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import Breadcrumb from "../../components/Breadcrumb";
-import AuthorBio from "../../components/AuthorBio";
-import { authors } from "../../lib/mock-data";
 import siteConfig from "../../config/site.config";
+import { prisma } from "../../lib/prisma";
+import { mapAuthor } from "../../lib/mappers";
 
 const crumbs = [
   { label: "Home", href: "/" },
   { label: "Sobre", href: "/about" },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const dbAuthors = await prisma.author.findMany();
+  const authors = dbAuthors.map(mapAuthor);
+
   return (
     <>
       <Header config={siteConfig} />
       <main className="flex-1 mx-auto max-w-3xl px-4 py-10 w-full">
         <Breadcrumb crumbs={crumbs} />
-
         <h1 className="mt-4 text-3xl font-bold text-gray-900">Sobre o {siteConfig.siteName}</h1>
 
         <section className="mt-8">
