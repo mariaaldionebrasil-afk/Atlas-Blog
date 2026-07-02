@@ -1,4 +1,19 @@
-import type { Post, Review, Category } from "./types";
+import type { Author, Post, Review, Category } from "./types";
+
+export const authors: Author[] = [
+  {
+    slug: "carolina-mendes",
+    name: "Carolina Mendes",
+    bio: "Jornalista especializada em tecnologia e finanças pessoais, com mais de 8 anos de experiência em veículos digitais. Testa produtos e escreve guias práticos focados em custo-benefício real.",
+    avatar: "/images/avatar-carolina.png",
+  },
+  {
+    slug: "rafael-souza",
+    name: "Rafael Souza",
+    bio: "Educador físico e nutricionista com pós-graduação em saúde preventiva. Escreve sobre bem-estar, qualidade de vida e hábitos saudáveis baseados em evidências científicas.",
+    avatar: "/images/avatar-rafael.png",
+  },
+];
 
 export const categories: Category[] = [
   {
@@ -39,6 +54,7 @@ SSD NVMe de 512 GB já é considerado padrão. Discos HD convencionais devem ser
 Prefira modelos com 60 Wh ou mais e que suportem carregamento rápido.`,
     category: "tecnologia",
     publishedDate: "2025-03-10",
+    author: authors[0],
   },
   {
     slug: "5-apps-de-produtividade-para-2025",
@@ -63,6 +79,7 @@ Perfeito para quem quer construir uma base de conhecimento pessoal em markdown.
 Para equipes de tecnologia, é a alternativa mais limpa ao Jira.`,
     category: "tecnologia",
     publishedDate: "2025-04-02",
+    author: authors[0],
   },
   {
     slug: "caminhada-diaria-beneficios",
@@ -84,6 +101,7 @@ Combinada a uma alimentação equilibrada, a caminhada ajuda a manter o metaboli
 Comece com 15 minutos e aumente 5 minutos por semana até atingir 30-45 minutos diários.`,
     category: "saude",
     publishedDate: "2025-02-18",
+    author: authors[1],
   },
   {
     slug: "como-dormir-melhor",
@@ -105,6 +123,7 @@ A luz azul de smartphones e notebooks suprime a produção de melatonina.
 A meia-vida da cafeína é de 5–7 horas. Um café às 15h ainda afeta o sono às 22h.`,
     category: "saude",
     publishedDate: "2025-05-05",
+    author: authors[1],
   },
   {
     slug: "como-montar-reserva-de-emergencia",
@@ -129,6 +148,7 @@ A reserva precisa ter liquidez imediata. As melhores opções são:
 4. Automatize a transferência no dia do pagamento`,
     category: "financas",
     publishedDate: "2025-01-15",
+    author: authors[0],
   },
   {
     slug: "tesouro-direto-para-iniciantes",
@@ -152,6 +172,7 @@ A reserva precisa ter liquidez imediata. As melhores opções são:
 IOF até 30 dias e IR regressivo: 22,5% até 6 meses, 15% acima de 2 anos.`,
     category: "financas",
     publishedDate: "2025-06-20",
+    author: authors[0],
   },
 ];
 
@@ -181,6 +202,7 @@ O único ponto fraco é a integração limitada com bibliotecas e formatos alter
       "Sem suporte nativo a EPUB",
       "Navegador web quase inutilizável",
     ],
+    author: authors[0],
   },
   {
     slug: "review-airfryer-philips-walita",
@@ -206,6 +228,7 @@ O timer mecânico é simples mas funcional. Modelos mais caros da linha têm dis
       "Cesto não vai à máquina de lavar",
       "Barulhosa em potência máxima",
     ],
+    author: authors[0],
   },
   {
     slug: "review-nubank-ultravioleta",
@@ -231,5 +254,6 @@ O app do Nubank é, reconhecidamente, o melhor entre bancos digitais: claro, rá
       "Seguro viagem básico",
       "Programa de pontos menos vantajoso que concorrentes premium",
     ],
+    author: authors[0],
   },
 ];

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import Breadcrumb from "../../../components/Breadcrumb";
+import AuthorBio from "../../../components/AuthorBio";
 import { reviews } from "../../../lib/mock-data";
 import siteConfig from "../../../config/site.config";
 
@@ -73,6 +74,7 @@ export default async function ReviewPage({ params }: Props) {
             </ul>
           </div>
         </div>
+        <AuthorBio author={review.author} />
       </main>
       <Footer config={siteConfig} />
     </>

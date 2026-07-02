@@ -45,6 +45,16 @@ export default function Footer({ config }: Props) {
                 Contato
               </Link>
             </li>
+            <li>
+              <Link href="/privacy-policy" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+                Política de Privacidade
+              </Link>
+            </li>
+            <li>
+              <Link href="/terms" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+                Termos de Uso
+              </Link>
+            </li>
           </ul>
         </div>
       </div>

@@ -1,3 +1,10 @@
+export type Author = {
+  slug: string;
+  name: string;
+  bio: string;
+  avatar?: string;
+};
+
 export type Post = {
   slug: string;
   title: string;
@@ -6,6 +13,7 @@ export type Post = {
   category: string;
   publishedDate: string;
   coverImage?: string;
+  author: Author;
 };
 
 export type Review = {
@@ -17,6 +25,7 @@ export type Review = {
   pros: string[];
   cons: string[];
   coverImage?: string;
+  author: Author;
 };
 
 export type Category = {
