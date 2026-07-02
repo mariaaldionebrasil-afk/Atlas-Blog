@@ -59,7 +59,7 @@ export default function Footer({ config }: Props) {
         </div>
       </div>
       <div className="border-t border-gray-200 py-4 text-center text-xs text-gray-400">
-        © {new Date().getFullYear()} {config.siteName}
+        © {new Date().getFullYear()} {config.siteName} · Todos os direitos reservados
       </div>
     </footer>
   );
