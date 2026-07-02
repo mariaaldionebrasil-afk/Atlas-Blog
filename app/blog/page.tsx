@@ -28,7 +28,8 @@ export default async function BlogPage({ searchParams }: Props) {
     <>
       <Header config={siteConfig} />
       <main className="flex-1 mx-auto max-w-5xl px-4 py-12 w-full">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Blog</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Blog</h1>
+        <h2 className="text-sm text-gray-500 font-normal mb-8">Todos os artigos</h2>
         <div className="grid gap-6 sm:grid-cols-2">
           {paginated.map((post) => (
             <PostCard key={post.slug} post={post} />

@@ -18,11 +18,11 @@ function StarRating({ rating }: { rating: number }) {
 export default function ReviewCard({ review }: Props) {
   return (
     <article className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow bg-white">
-      <h2 className="text-lg font-semibold text-gray-900">
+      <h3 className="text-lg font-semibold text-gray-900">
         <Link href={`/review/${review.slug}`} className="hover:underline">
           {review.productName}
         </Link>
-      </h2>
+      </h3>
       <div className="mt-1">
         <StarRating rating={review.rating} />
       </div>
