@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { importKeywords, checkCannibalization, updateKeywordStatus } from './actions';
-import type { Keyword } from '@/lib/generated/prisma/client';
+import type { Keyword, Silo } from '@/lib/generated/prisma/client';
 
 const statusLabel: Record<string, string> = {
   PENDENTE: 'Pendente',
@@ -21,7 +21,7 @@ const statusColor: Record<string, string> = {
 };
 
 type Props = {
-  keywords: Keyword[];
+  keywords: (Keyword & { silo: Silo | null })[];
 };
 
 export function KeywordsPanel({ keywords }: Props) {
@@ -171,6 +171,15 @@ export function KeywordsPanel({ keywords }: Props) {
                         Gerar tópicos
                       </Link>
                     )}
+                    {keyword.status === 'APROVADA' &&
+                      (keyword.silo?.type === 'APOIO' || keyword.silo?.type === 'SATELITE') && (
+                        <Link
+                          href={`/admin/keywords/${keyword.id}/review`}
+                          className="text-xs font-medium text-purple-700 hover:underline"
+                        >
+                          Pesquisar e gerar review
+                        </Link>
+                      )}
                   </div>
                 </td>
               </tr>

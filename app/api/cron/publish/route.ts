@@ -7,13 +7,19 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const result = await prisma.post.updateMany({
-    where: {
-      status: 'SCHEDULED',
-      scheduledDate: { lte: new Date() },
-    },
-    data: { status: 'PUBLISHED' },
-  });
+  const now = new Date();
+  const where = { status: 'SCHEDULED' as const, scheduledDate: { lte: now } };
 
-  return NextResponse.json({ published: result.count });
+  const [posts, reviews, roundups] = await Promise.all([
+    prisma.post.updateMany({ where, data: { status: 'PUBLISHED' } }),
+    prisma.review.updateMany({ where, data: { status: 'PUBLISHED' } }),
+    prisma.roundup.updateMany({ where, data: { status: 'PUBLISHED' } }),
+  ]);
+
+  return NextResponse.json({
+    published: posts.count + reviews.count + roundups.count,
+    posts: posts.count,
+    reviews: reviews.count,
+    roundups: roundups.count,
+  });
 }

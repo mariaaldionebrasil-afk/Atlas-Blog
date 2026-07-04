@@ -8,14 +8,15 @@ datasource db {
 }
 
 model Author {
-  id        String   @id @default(uuid())
-  slug      String   @unique
+  id        String    @id @default(uuid())
+  slug      String    @unique
   name      String
   bio       String
   avatar    String?
   posts     Post[]
   reviews   Review[]
-  createdAt DateTime @default(now())
+  roundups  Roundup[]
+  createdAt DateTime  @default(now())
 }
 
 model Category {
@@ -56,6 +57,7 @@ model Keyword {
   silo                Silo?         @relation(fields: [siloId], references: [id])
   siloId              String?
   posts               Post[]
+  reviews             Review[]
   createdAt           DateTime      @default(now())
 }
 
@@ -89,16 +91,48 @@ model Post {
 }
 
 model Review {
-  id          String        @id @default(uuid())
-  slug        String        @unique
-  productName String
-  rating      Float
-  summary     String
-  content     String
-  pros        String[]
-  cons        String[]
-  coverImage  String?
-  status      ContentStatus @default(DRAFT)
-  author      Author        @relation(fields: [authorId], references: [id])
-  authorId    String
+  id                        String        @id @default(uuid())
+  slug                      String        @unique
+  productName                String
+  rating                    Float
+  summary                   String
+  content                   String
+  pros                      String[]
+  cons                      String[]
+  coverImage                String?
+  price                     String?
+  status                    ContentStatus @default(DRAFT)
+  author                    Author        @relation(fields: [authorId], references: [id])
+  authorId                  String
+  sourceUrls                Json?
+  keyword                   Keyword?      @relation(fields: [keywordId], references: [id])
+  keywordId                 String?
+  scheduledDate             DateTime?
+  affiliateLinkAmazon       String?
+  affiliateLinkMercadoLivre String?
+  roundupItems              RoundupItem[]
+}
+
+model Roundup {
+  id            String        @id @default(uuid())
+  slug          String        @unique
+  title         String
+  snippet       String
+  introContent  String
+  faq           Json?
+  status        ContentStatus @default(DRAFT)
+  scheduledDate DateTime?
+  author        Author        @relation(fields: [authorId], references: [id])
+  authorId      String
+  items         RoundupItem[]
+  createdAt     DateTime      @default(now())
+}
+
+model RoundupItem {
+  id        String  @id @default(uuid())
+  roundup   Roundup @relation(fields: [roundupId], references: [id])
+  roundupId String
+  review    Review  @relation(fields: [reviewId], references: [id])
+  reviewId  String
+  position  Int
 }

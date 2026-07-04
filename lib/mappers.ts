@@ -13,6 +13,7 @@ type PrismaReview = {
   slug: string; productName: string; rating: number; summary: string;
   content: string; pros: string[]; cons: string[]; coverImage: string | null;
   author: PrismaAuthor;
+  affiliateLinkAmazon: string | null; affiliateLinkMercadoLivre: string | null;
 };
 
 export function mapPost(p: PrismaPost): Post {
@@ -39,6 +40,8 @@ export function mapReview(r: PrismaReview): Review {
     cons: r.cons,
     coverImage: r.coverImage ?? undefined,
     author: mapAuthor(r.author),
+    affiliateLinkAmazon: r.affiliateLinkAmazon ?? undefined,
+    affiliateLinkMercadoLivre: r.affiliateLinkMercadoLivre ?? undefined,
   };
 }
 

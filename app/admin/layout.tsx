@@ -8,6 +8,7 @@ const navItems = [
   { href: '/admin/queue', label: 'Fila' },
   { href: '/admin/posts', label: 'Posts' },
   { href: '/admin/reviews', label: 'Reviews' },
+  { href: '/admin/roundups', label: 'Roundups' },
   { href: '/admin/categories', label: 'Categorias' },
   { href: '/admin/authors', label: 'Autores' },
 ];

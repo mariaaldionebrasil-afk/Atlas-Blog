@@ -6,6 +6,7 @@ import { slugify } from '@/lib/slugify';
 import { CoverImageField } from '../CoverImageField';
 import { saveReview, deleteReview, type ReviewInput } from './actions';
 import type { ContentStatus } from '@/lib/generated/prisma/enums';
+import { renderContentParagraphs } from '@/components/RenderContent';
 
 type Option = { id: string; name: string };
 
@@ -26,6 +27,11 @@ export function ReviewForm({ review, authors }: Props) {
   const [pros, setPros] = useState((review?.pros ?? []).join('\n'));
   const [cons, setCons] = useState((review?.cons ?? []).join('\n'));
   const [coverImage, setCoverImage] = useState(review?.coverImage ?? '');
+  const [price, setPrice] = useState(review?.price ?? '');
+  const [affiliateLinkAmazon, setAffiliateLinkAmazon] = useState(review?.affiliateLinkAmazon ?? '');
+  const [affiliateLinkMercadoLivre, setAffiliateLinkMercadoLivre] = useState(
+    review?.affiliateLinkMercadoLivre ?? ''
+  );
   const [authorId, setAuthorId] = useState(review?.authorId ?? authors[0]?.id ?? '');
   const [status, setStatus] = useState<ContentStatus>(review?.status ?? 'DRAFT');
   const [pending, setPending] = useState(false);
@@ -54,8 +60,11 @@ export function ReviewForm({ review, authors }: Props) {
         pros: pros.split('\n').map((s) => s.trim()).filter(Boolean),
         cons: cons.split('\n').map((s) => s.trim()).filter(Boolean),
         coverImage,
+        price,
         authorId,
         status,
+        affiliateLinkAmazon,
+        affiliateLinkMercadoLivre,
       });
     } catch (e) {
       if (e instanceof Error && e.message !== 'NEXT_REDIRECT') {
@@ -114,6 +123,16 @@ export function ReviewForm({ review, authors }: Props) {
       </div>
 
       <div>
+        <label className="block text-sm font-medium text-gray-700">Preço aproximado</label>
+        <input
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          placeholder="R$ 899"
+          className="mt-1 w-48 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+        />
+      </div>
+
+      <div>
         <label className="block text-sm font-medium text-gray-700">Resumo</label>
         <textarea
           required
@@ -137,9 +156,7 @@ export function ReviewForm({ review, authors }: Props) {
         </div>
         {showPreview ? (
           <div className="mt-1 min-h-[200px] space-y-3 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700">
-            {content.split('\n\n').map((paragraph, i) => (
-              <p key={i}>{paragraph}</p>
-            ))}
+            {renderContentParagraphs(content)}
           </div>
         ) : (
           <textarea
@@ -175,6 +192,34 @@ export function ReviewForm({ review, authors }: Props) {
       </div>
 
       <CoverImageField value={coverImage} onChange={setCoverImage} />
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Link de afiliado (Amazon)</label>
+          <input
+            type="url"
+            value={affiliateLinkAmazon}
+            onChange={(e) => setAffiliateLinkAmazon(e.target.value)}
+            placeholder="https://amazon.com.br/..."
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">Link de afiliado (Mercado Livre)</label>
+          <input
+            type="url"
+            value={affiliateLinkMercadoLivre}
+            onChange={(e) => setAffiliateLinkMercadoLivre(e.target.value)}
+            placeholder="https://mercadolivre.com.br/..."
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
+          />
+        </div>
+      </div>
+      {!affiliateLinkAmazon && !affiliateLinkMercadoLivre && (
+        <p className="text-xs text-amber-600">
+          Preencha ao menos um link de afiliado antes de aprovar o agendamento deste review.
+        </p>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div>

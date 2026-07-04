@@ -26,6 +26,8 @@ export type Review = {
   cons: string[];
   coverImage?: string;
   author: Author;
+  affiliateLinkAmazon?: string;
+  affiliateLinkMercadoLivre?: string;
 };
 
 export type Category = {

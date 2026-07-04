@@ -2,7 +2,10 @@ import { prisma } from '@/lib/prisma';
 import { KeywordsPanel } from './KeywordsPanel';
 
 export default async function AdminKeywordsPage() {
-  const keywords = await prisma.keyword.findMany({ orderBy: { createdAt: 'desc' } });
+  const keywords = await prisma.keyword.findMany({
+    include: { silo: true },
+    orderBy: { createdAt: 'desc' },
+  });
 
   return (
     <div className="p-8">

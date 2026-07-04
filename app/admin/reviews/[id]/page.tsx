@@ -35,8 +35,11 @@ export default async function AdminReviewEditPage({ params }: Props) {
                 pros: review.pros,
                 cons: review.cons,
                 coverImage: review.coverImage ?? '',
+                price: review.price ?? '',
                 authorId: review.authorId,
                 status: review.status,
+                affiliateLinkAmazon: review.affiliateLinkAmazon ?? '',
+                affiliateLinkMercadoLivre: review.affiliateLinkMercadoLivre ?? '',
               }
             : null
         }

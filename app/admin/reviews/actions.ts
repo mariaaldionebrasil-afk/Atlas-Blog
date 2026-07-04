@@ -16,8 +16,11 @@ export type ReviewInput = {
   pros: string[];
   cons: string[];
   coverImage: string;
+  price: string;
   authorId: string;
   status: ContentStatus;
+  affiliateLinkAmazon?: string;
+  affiliateLinkMercadoLivre?: string;
 };
 
 async function requireAdmin() {
@@ -40,8 +43,11 @@ export async function saveReview(input: ReviewInput) {
     pros: input.pros,
     cons: input.cons,
     coverImage: input.coverImage || null,
+    price: input.price || null,
     authorId: input.authorId,
     status: input.status,
+    affiliateLinkAmazon: input.affiliateLinkAmazon || null,
+    affiliateLinkMercadoLivre: input.affiliateLinkMercadoLivre || null,
   };
 
   if (input.id) {

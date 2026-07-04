@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import Breadcrumb from "../../../components/Breadcrumb";
@@ -6,6 +7,8 @@ import AuthorBio from "../../../components/AuthorBio";
 import siteConfig from "../../../config/site.config";
 import { prisma } from "../../../lib/prisma";
 import { mapReview } from "../../../lib/mappers";
+import { renderContentParagraphs } from "../../../components/RenderContent";
+import AffiliateButton from "../../../components/AffiliateButton";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -29,6 +32,11 @@ export default async function ReviewPage({ params }: Props) {
 
   const review = mapReview(dbReview);
 
+  const roundupItem = await prisma.roundupItem.findFirst({
+    where: { reviewId: dbReview.id, roundup: { status: "PUBLISHED" } },
+    include: { roundup: true },
+  });
+
   const crumbs = [
     { label: "Home", href: "/" },
     { label: "Reviews", href: "/reviews" },
@@ -51,8 +59,20 @@ export default async function ReviewPage({ params }: Props) {
           <span className="text-gray-500 text-sm">{review.rating}/5</span>
         </div>
         <p className="mt-4 text-lg text-gray-600 border-l-4 border-amber-200 pl-4 italic">{review.summary}</p>
+
+        {(review.affiliateLinkAmazon || review.affiliateLinkMercadoLivre) && (
+          <div className="mt-4 flex flex-wrap gap-3">
+            {review.affiliateLinkAmazon && (
+              <AffiliateButton label="Ver na Amazon" url={review.affiliateLinkAmazon} />
+            )}
+            {review.affiliateLinkMercadoLivre && (
+              <AffiliateButton label="Ver no Mercado Livre" url={review.affiliateLinkMercadoLivre} />
+            )}
+          </div>
+        )}
+
         <article className="mt-8 space-y-4 text-gray-700 leading-relaxed">
-          {review.content.split("\n\n").map((paragraph, i) => <p key={i}>{paragraph}</p>)}
+          {renderContentParagraphs(review.content)}
         </article>
         <div className="mt-10 grid sm:grid-cols-2 gap-6">
           <div className="bg-green-50 border border-green-200 rounded-lg p-5">
@@ -76,6 +96,14 @@ export default async function ReviewPage({ params }: Props) {
             </ul>
           </div>
         </div>
+        {roundupItem && (
+          <p className="mt-8 text-sm text-gray-600">
+            Faz parte de:{" "}
+            <Link href={`/roundup/${roundupItem.roundup.slug}`} className="text-blue-600 hover:underline">
+              {roundupItem.roundup.title}
+            </Link>
+          </p>
+        )}
         <AuthorBio author={review.author} />
       </main>
       <Footer config={siteConfig} />
