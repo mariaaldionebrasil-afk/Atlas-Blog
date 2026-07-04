@@ -12,7 +12,10 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  const posts = await prisma.post.findMany({ select: { slug: true } });
+  const posts = await prisma.post.findMany({
+    where: { status: "PUBLISHED" },
+    select: { slug: true },
+  });
   return posts.map((p) => ({ slug: p.slug }));
 }
 
@@ -22,7 +25,7 @@ export default async function PostPage({ params }: Props) {
     where: { slug },
     include: { author: true, category: true },
   });
-  if (!dbPost) notFound();
+  if (!dbPost || dbPost.status !== "PUBLISHED") notFound();
 
   const post = mapPost(dbPost);
 

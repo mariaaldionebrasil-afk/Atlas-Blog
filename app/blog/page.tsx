@@ -17,8 +17,9 @@ export default async function BlogPage({ searchParams }: Props) {
   const currentPage = Math.max(1, Number(page) || 1);
 
   const [total, dbPosts] = await Promise.all([
-    prisma.post.count(),
+    prisma.post.count({ where: { status: "PUBLISHED" } }),
     prisma.post.findMany({
+      where: { status: "PUBLISHED" },
       include: { author: true, category: true },
       orderBy: { publishedDate: "desc" },
       skip: (currentPage - 1) * POSTS_PER_PAGE,

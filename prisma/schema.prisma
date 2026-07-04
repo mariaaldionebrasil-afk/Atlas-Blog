@@ -26,23 +26,29 @@ model Category {
   posts       Post[]
 }
 
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model Post {
-  id            String   @id @default(uuid())
-  slug          String   @unique
+  id            String        @id @default(uuid())
+  slug          String        @unique
   title         String
   excerpt       String
   content       String
   publishedDate DateTime
   coverImage    String?
-  category      Category @relation(fields: [categoryId], references: [id])
+  status        ContentStatus @default(DRAFT)
+  category      Category      @relation(fields: [categoryId], references: [id])
   categoryId    String
-  author        Author   @relation(fields: [authorId], references: [id])
+  author        Author        @relation(fields: [authorId], references: [id])
   authorId      String
 }
 
 model Review {
-  id          String   @id @default(uuid())
-  slug        String   @unique
+  id          String        @id @default(uuid())
+  slug        String        @unique
   productName String
   rating      Float
   summary     String
@@ -50,6 +56,7 @@ model Review {
   pros        String[]
   cons        String[]
   coverImage  String?
-  author      Author   @relation(fields: [authorId], references: [id])
+  status      ContentStatus @default(DRAFT)
+  author      Author        @relation(fields: [authorId], references: [id])
   authorId    String
 }

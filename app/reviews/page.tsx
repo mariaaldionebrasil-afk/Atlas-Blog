@@ -6,7 +6,10 @@ import { prisma } from "../../lib/prisma";
 import { mapReview } from "../../lib/mappers";
 
 export default async function ReviewsPage() {
-  const dbReviews = await prisma.review.findMany({ include: { author: true } });
+  const dbReviews = await prisma.review.findMany({
+    where: { status: "PUBLISHED" },
+    include: { author: true },
+  });
   const reviews = dbReviews.map(mapReview);
 
   return (

@@ -13,11 +13,13 @@ import { mapPost, mapReview } from "../lib/mappers";
 export default async function HomePage() {
   const [dbPosts, dbReviews] = await Promise.all([
     prisma.post.findMany({
+      where: { status: "PUBLISHED" },
       include: { author: true, category: true },
       orderBy: { publishedDate: "desc" },
       take: 4,
     }),
     prisma.review.findMany({
+      where: { status: "PUBLISHED" },
       include: { author: true },
     }),
   ]);

@@ -12,7 +12,10 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  const reviews = await prisma.review.findMany({ select: { slug: true } });
+  const reviews = await prisma.review.findMany({
+    where: { status: "PUBLISHED" },
+    select: { slug: true },
+  });
   return reviews.map((r) => ({ slug: r.slug }));
 }
 
@@ -22,7 +25,7 @@ export default async function ReviewPage({ params }: Props) {
     where: { slug },
     include: { author: true },
   });
-  if (!dbReview) notFound();
+  if (!dbReview || dbReview.status !== "PUBLISHED") notFound();
 
   const review = mapReview(dbReview);
 

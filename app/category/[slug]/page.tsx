@@ -22,7 +22,7 @@ export default async function CategoryPage({ params }: Props) {
   if (!category) notFound();
 
   const dbPosts = await prisma.post.findMany({
-    where: { category: { slug } },
+    where: { category: { slug }, status: "PUBLISHED" },
     include: { author: true, category: true },
     orderBy: { publishedDate: "desc" },
   });
