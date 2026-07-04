@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { slugify } from '@/lib/slugify';
 import { CoverImageField } from '../CoverImageField';
 import { savePost, deletePost, type PostInput } from './actions';
 import { useRouter } from 'next/navigation';
+import type { ContentStatus } from '@/lib/generated/prisma/enums';
+import { renderContentParagraphs } from '@/components/RenderContent';
 
 type Option = { id: string; name: string };
 
@@ -25,7 +28,7 @@ export function PostForm({ post, categories, authors }: Props) {
   const [coverImage, setCoverImage] = useState(post?.coverImage ?? '');
   const [categoryId, setCategoryId] = useState(post?.categoryId ?? categories[0]?.id ?? '');
   const [authorId, setAuthorId] = useState(post?.authorId ?? authors[0]?.id ?? '');
-  const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED'>(post?.status ?? 'DRAFT');
+  const [status, setStatus] = useState<ContentStatus>(post?.status ?? 'DRAFT');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -119,9 +122,7 @@ export function PostForm({ post, categories, authors }: Props) {
         </div>
         {showPreview ? (
           <div className="mt-1 min-h-[200px] space-y-3 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700">
-            {content.split('\n\n').map((paragraph, i) => (
-              <p key={i}>{paragraph}</p>
-            ))}
+            {renderContentParagraphs(content)}
           </div>
         ) : (
           <textarea
@@ -134,6 +135,29 @@ export function PostForm({ post, categories, authors }: Props) {
           />
         )}
       </div>
+
+      {post?.outline && post.outline.length > 0 && (
+        <div className="rounded-md border border-gray-200 bg-gray-50 p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">Outline (tópicos aprovados)</span>
+            {post.keywordId && (
+              <Link
+                href={`/admin/keywords/${post.keywordId}/outline`}
+                className="text-xs font-medium text-blue-600 hover:underline"
+              >
+                Editar tópicos
+              </Link>
+            )}
+          </div>
+          <ul className="space-y-1 text-sm text-gray-700">
+            {post.outline.map((topic, i) => (
+              <li key={i} className={topic.level === 'H3' ? 'ml-4 text-gray-600' : 'font-medium'}>
+                {topic.text}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <CoverImageField value={coverImage} onChange={setCoverImage} />
 
@@ -172,7 +196,7 @@ export function PostForm({ post, categories, authors }: Props) {
         <label className="block text-sm font-medium text-gray-700">Status</label>
         <select
           value={status}
-          onChange={(e) => setStatus(e.target.value as 'DRAFT' | 'PUBLISHED')}
+          onChange={(e) => setStatus(e.target.value as ContentStatus)}
           className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
         >
           <option value="DRAFT">Rascunho</option>

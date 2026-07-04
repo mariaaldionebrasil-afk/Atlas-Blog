@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import type { ContentStatus } from '@/lib/generated/prisma/enums';
 
 export type PostInput = {
   id?: string;
@@ -14,7 +15,9 @@ export type PostInput = {
   coverImage: string;
   categoryId: string;
   authorId: string;
-  status: 'DRAFT' | 'PUBLISHED';
+  status: ContentStatus;
+  keywordId?: string | null;
+  outline?: { level: 'H2' | 'H3'; text: string }[] | null;
 };
 
 async function requireAdmin() {

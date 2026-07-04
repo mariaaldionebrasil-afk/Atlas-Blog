@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import type { ContentStatus } from '@/lib/generated/prisma/enums';
 
 export type ReviewInput = {
   id?: string;
@@ -16,7 +17,7 @@ export type ReviewInput = {
   cons: string[];
   coverImage: string;
   authorId: string;
-  status: 'DRAFT' | 'PUBLISHED';
+  status: ContentStatus;
 };
 
 async function requireAdmin() {

@@ -6,6 +6,7 @@ import AuthorBio from "../../../components/AuthorBio";
 import siteConfig from "../../../config/site.config";
 import { prisma } from "../../../lib/prisma";
 import { mapPost } from "../../../lib/mappers";
+import { renderContentParagraphs } from "../../../components/RenderContent";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -47,7 +48,7 @@ export default async function PostPage({ params }: Props) {
         <time className="mt-2 block text-sm text-gray-400">{post.publishedDate}</time>
         <p className="mt-4 text-lg text-gray-600 border-l-4 border-blue-200 pl-4 italic">{post.excerpt}</p>
         <article className="mt-8 space-y-4 text-gray-700 leading-relaxed">
-          {post.content.split("\n\n").map((paragraph, i) => <p key={i}>{paragraph}</p>)}
+          {renderContentParagraphs(post.content)}
         </article>
         <AuthorBio author={post.author} />
       </main>

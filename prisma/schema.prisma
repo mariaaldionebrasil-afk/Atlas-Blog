@@ -28,7 +28,45 @@ model Category {
 
 enum ContentStatus {
   DRAFT
+  SCHEDULED
   PUBLISHED
+}
+
+enum SiloType {
+  PILAR
+  APOIO
+  SATELITE
+}
+
+enum KeywordStatus {
+  PENDENTE
+  APROVADA
+  CANIBALIZADA
+  REMOVIDA
+}
+
+model Keyword {
+  id                  String        @id @default(uuid())
+  term                String
+  searchIntent        String?
+  volume              Int?
+  cpc                 Float?
+  status              KeywordStatus @default(PENDENTE)
+  cannibalizationNote String?
+  silo                Silo?         @relation(fields: [siloId], references: [id])
+  siloId              String?
+  posts               Post[]
+  createdAt           DateTime      @default(now())
+}
+
+model Silo {
+  id       String    @id @default(uuid())
+  name     String
+  type     SiloType
+  parent   Silo?     @relation("SiloHierarchy", fields: [parentId], references: [id])
+  parentId String?
+  children Silo[]    @relation("SiloHierarchy")
+  keywords Keyword[]
 }
 
 model Post {
@@ -44,6 +82,10 @@ model Post {
   categoryId    String
   author        Author        @relation(fields: [authorId], references: [id])
   authorId      String
+  keyword       Keyword?      @relation(fields: [keywordId], references: [id])
+  keywordId     String?
+  outline       Json?
+  scheduledDate DateTime?
 }
 
 model Review {

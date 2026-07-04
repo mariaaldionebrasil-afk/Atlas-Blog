@@ -7,12 +7,20 @@ type Props = {
 
 const statusLabel: Record<string, string> = {
   DRAFT: 'Rascunho',
+  SCHEDULED: 'Agendado',
   PUBLISHED: 'Publicado',
+};
+
+const statusColor: Record<string, string> = {
+  DRAFT: 'bg-amber-100 text-amber-700',
+  SCHEDULED: 'bg-blue-100 text-blue-700',
+  PUBLISHED: 'bg-green-100 text-green-700',
 };
 
 export default async function AdminPostsPage({ searchParams }: Props) {
   const { status } = await searchParams;
-  const filter = status === 'DRAFT' || status === 'PUBLISHED' ? status : undefined;
+  const filter =
+    status === 'DRAFT' || status === 'SCHEDULED' || status === 'PUBLISHED' ? status : undefined;
 
   const posts = await prisma.post.findMany({
     where: filter ? { status: filter } : undefined,
@@ -23,6 +31,7 @@ export default async function AdminPostsPage({ searchParams }: Props) {
   const filters = [
     { label: 'Todos', value: undefined },
     { label: 'Rascunho', value: 'DRAFT' },
+    { label: 'Agendado', value: 'SCHEDULED' },
     { label: 'Publicado', value: 'PUBLISHED' },
   ];
 
@@ -75,13 +84,7 @@ export default async function AdminPostsPage({ searchParams }: Props) {
                 <td className="px-4 py-3 text-gray-600">{post.category.name}</td>
                 <td className="px-4 py-3 text-gray-600">{post.author.name}</td>
                 <td className="px-4 py-3">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                      post.status === 'PUBLISHED'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-amber-100 text-amber-700'
-                    }`}
-                  >
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColor[post.status]}`}>
                     {statusLabel[post.status]}
                   </span>
                 </td>

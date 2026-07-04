@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { slugify } from '@/lib/slugify';
 import { CoverImageField } from '../CoverImageField';
 import { saveReview, deleteReview, type ReviewInput } from './actions';
+import type { ContentStatus } from '@/lib/generated/prisma/enums';
 
 type Option = { id: string; name: string };
 
@@ -26,7 +27,7 @@ export function ReviewForm({ review, authors }: Props) {
   const [cons, setCons] = useState((review?.cons ?? []).join('\n'));
   const [coverImage, setCoverImage] = useState(review?.coverImage ?? '');
   const [authorId, setAuthorId] = useState(review?.authorId ?? authors[0]?.id ?? '');
-  const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED'>(review?.status ?? 'DRAFT');
+  const [status, setStatus] = useState<ContentStatus>(review?.status ?? 'DRAFT');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -194,7 +195,7 @@ export function ReviewForm({ review, authors }: Props) {
           <label className="block text-sm font-medium text-gray-700">Status</label>
           <select
             value={status}
-            onChange={(e) => setStatus(e.target.value as 'DRAFT' | 'PUBLISHED')}
+            onChange={(e) => setStatus(e.target.value as ContentStatus)}
             className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
           >
             <option value="DRAFT">Rascunho</option>

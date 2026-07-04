@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import { PostForm } from '../PostForm';
+import { GenerateArticleButton } from './GenerateArticleButton';
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -23,7 +24,11 @@ export default async function AdminPostEditPage({ params }: Props) {
       <h1 className="mb-6 text-xl font-semibold text-gray-900">
         {isNew ? 'Novo Post' : 'Editar Post'}
       </h1>
+      {post?.outline && (post.outline as unknown[]).length > 0 && (
+        <GenerateArticleButton postId={post.id} />
+      )}
       <PostForm
+        key={post ? `${post.id}:${post.content.length}` : 'new'}
         post={
           post
             ? {
@@ -36,6 +41,8 @@ export default async function AdminPostEditPage({ params }: Props) {
                 categoryId: post.categoryId,
                 authorId: post.authorId,
                 status: post.status,
+                keywordId: post.keywordId,
+                outline: (post.outline as unknown as { level: 'H2' | 'H3'; text: string }[] | null) ?? null,
               }
             : null
         }

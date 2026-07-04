@@ -3,6 +3,9 @@ import { LogoutButton } from './logout-button';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard' },
+  { href: '/admin/keywords', label: 'Keywords' },
+  { href: '/admin/silos', label: 'Silos' },
+  { href: '/admin/queue', label: 'Fila' },
   { href: '/admin/posts', label: 'Posts' },
   { href: '/admin/reviews', label: 'Reviews' },
   { href: '/admin/categories', label: 'Categorias' },
