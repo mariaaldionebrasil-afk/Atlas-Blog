@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Header from "../../../components/Header";
@@ -9,6 +10,7 @@ import { prisma } from "../../../lib/prisma";
 import { mapReview } from "../../../lib/mappers";
 import { renderContentParagraphs } from "../../../components/RenderContent";
 import AffiliateButton from "../../../components/AffiliateButton";
+import { JsonLd } from "../../../components/JsonLd";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -20,6 +22,25 @@ export async function generateStaticParams() {
     select: { slug: true },
   });
   return reviews.map((r) => ({ slug: r.slug }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const dbReview = await prisma.review.findUnique({ where: { slug } });
+  if (!dbReview || dbReview.status !== "PUBLISHED") return {};
+
+  return {
+    title: dbReview.productName,
+    description: dbReview.summary,
+    alternates: { canonical: `/review/${slug}` },
+    openGraph: {
+      title: dbReview.productName,
+      description: dbReview.summary,
+      url: `/review/${slug}`,
+      type: "article",
+      images: dbReview.coverImage ? [dbReview.coverImage] : undefined,
+    },
+  };
 }
 
 export default async function ReviewPage({ params }: Props) {
@@ -48,6 +69,16 @@ export default async function ReviewPage({ params }: Props) {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: review.productName,
+          description: review.summary,
+          image: review.coverImage,
+          author: { "@type": "Person", name: review.author.name },
+        }}
+      />
       <Header config={siteConfig} />
       <main className="flex-1 mx-auto max-w-3xl px-4 py-10 w-full">
         <Breadcrumb crumbs={crumbs} />

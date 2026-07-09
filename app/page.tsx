@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import HeroSection from "../components/HeroSection";
@@ -9,6 +10,19 @@ import siteConfig from "../config/site.config";
 import Link from "next/link";
 import { prisma } from "../lib/prisma";
 import { mapPost, mapReview } from "../lib/mappers";
+import { JsonLd } from "../components/JsonLd";
+
+export const metadata: Metadata = {
+  title: siteConfig.siteName,
+  description: "Conteúdo informacional, reviews e guias práticos para o seu dia a dia.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: siteConfig.siteName,
+    description: "Conteúdo informacional, reviews e guias práticos para o seu dia a dia.",
+    url: "/",
+    type: "website",
+  },
+};
 
 export default async function HomePage() {
   const [dbPosts, dbReviews] = await Promise.all([
@@ -29,6 +43,14 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: siteConfig.siteName,
+          url: process.env.SITE_URL,
+        }}
+      />
       <Header config={siteConfig} />
       <main className="flex-1">
         <HeroSection

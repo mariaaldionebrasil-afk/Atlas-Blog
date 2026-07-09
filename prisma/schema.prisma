@@ -72,27 +72,28 @@ model Silo {
 }
 
 model Post {
-  id            String        @id @default(uuid())
-  slug          String        @unique
-  title         String
-  excerpt       String
-  content       String
-  publishedDate DateTime
-  coverImage    String?
-  status        ContentStatus @default(DRAFT)
-  category      Category      @relation(fields: [categoryId], references: [id])
-  categoryId    String
-  author        Author        @relation(fields: [authorId], references: [id])
-  authorId      String
-  keyword       Keyword?      @relation(fields: [keywordId], references: [id])
-  keywordId     String?
-  outline       Json?
-  scheduledDate DateTime?
+  id                 String              @id @default(uuid())
+  slug               String              @unique
+  title              String
+  excerpt            String
+  content            String
+  publishedDate      DateTime
+  coverImage         String?
+  status             ContentStatus       @default(DRAFT)
+  category           Category            @relation(fields: [categoryId], references: [id])
+  categoryId         String
+  author             Author              @relation(fields: [authorId], references: [id])
+  authorId           String
+  keyword            Keyword?            @relation(fields: [keywordId], references: [id])
+  keywordId          String?
+  outline            Json?
+  scheduledDate      DateTime?
+  socialPublications SocialPublication[]
 }
 
 model Review {
-  id                        String        @id @default(uuid())
-  slug                      String        @unique
+  id                        String              @id @default(uuid())
+  slug                      String              @unique
   productName                String
   rating                    Float
   summary                   String
@@ -101,31 +102,33 @@ model Review {
   cons                      String[]
   coverImage                String?
   price                     String?
-  status                    ContentStatus @default(DRAFT)
-  author                    Author        @relation(fields: [authorId], references: [id])
+  status                    ContentStatus       @default(DRAFT)
+  author                    Author              @relation(fields: [authorId], references: [id])
   authorId                  String
   sourceUrls                Json?
-  keyword                   Keyword?      @relation(fields: [keywordId], references: [id])
+  keyword                   Keyword?            @relation(fields: [keywordId], references: [id])
   keywordId                 String?
   scheduledDate             DateTime?
   affiliateLinkAmazon       String?
   affiliateLinkMercadoLivre String?
   roundupItems              RoundupItem[]
+  socialPublications        SocialPublication[]
 }
 
 model Roundup {
-  id            String        @id @default(uuid())
-  slug          String        @unique
-  title         String
-  snippet       String
-  introContent  String
-  faq           Json?
-  status        ContentStatus @default(DRAFT)
-  scheduledDate DateTime?
-  author        Author        @relation(fields: [authorId], references: [id])
-  authorId      String
-  items         RoundupItem[]
-  createdAt     DateTime      @default(now())
+  id                 String              @id @default(uuid())
+  slug               String              @unique
+  title              String
+  snippet            String
+  introContent       String
+  faq                Json?
+  status             ContentStatus       @default(DRAFT)
+  scheduledDate      DateTime?
+  author             Author              @relation(fields: [authorId], references: [id])
+  authorId           String
+  items              RoundupItem[]
+  createdAt          DateTime            @default(now())
+  socialPublications SocialPublication[]
 }
 
 model RoundupItem {
@@ -135,4 +138,39 @@ model RoundupItem {
   review    Review  @relation(fields: [reviewId], references: [id])
   reviewId  String
   position  Int
+}
+
+enum SocialNetwork {
+  FACEBOOK
+  INSTAGRAM
+}
+
+enum SocialPublicationStatus {
+  SUCCESS
+  FAILED
+}
+
+model MetaCredential {
+  id                         String   @id @default("singleton")
+  facebookUserToken          String
+  facebookUserTokenExpiresAt DateTime
+  facebookPageAccessToken    String
+  instagramAccessToken       String
+  instagramTokenExpiresAt    DateTime
+  updatedAt                  DateTime @updatedAt
+}
+
+model SocialPublication {
+  id           String                   @id @default(uuid())
+  post         Post?                    @relation(fields: [postId], references: [id])
+  postId       String?
+  review       Review?                  @relation(fields: [reviewId], references: [id])
+  reviewId     String?
+  roundup      Roundup?                 @relation(fields: [roundupId], references: [id])
+  roundupId    String?
+  network      SocialNetwork
+  status       SocialPublicationStatus
+  externalId   String?
+  errorMessage String?
+  createdAt    DateTime                 @default(now())
 }

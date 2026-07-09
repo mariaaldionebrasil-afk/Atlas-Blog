@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Header from "../../../components/Header";
@@ -19,6 +20,24 @@ export async function generateStaticParams() {
     select: { slug: true },
   });
   return roundups.map((r) => ({ slug: r.slug }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const dbRoundup = await prisma.roundup.findUnique({ where: { slug } });
+  if (!dbRoundup || dbRoundup.status !== "PUBLISHED") return {};
+
+  return {
+    title: dbRoundup.title,
+    description: dbRoundup.snippet,
+    alternates: { canonical: `/roundup/${slug}` },
+    openGraph: {
+      title: dbRoundup.title,
+      description: dbRoundup.snippet,
+      url: `/roundup/${slug}`,
+      type: "article",
+    },
+  };
 }
 
 export default async function RoundupPage({ params }: Props) {

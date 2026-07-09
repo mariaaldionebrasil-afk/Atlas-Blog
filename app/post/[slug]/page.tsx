@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
@@ -7,6 +8,7 @@ import siteConfig from "../../../config/site.config";
 import { prisma } from "../../../lib/prisma";
 import { mapPost } from "../../../lib/mappers";
 import { renderContentParagraphs } from "../../../components/RenderContent";
+import { JsonLd } from "../../../components/JsonLd";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -18,6 +20,25 @@ export async function generateStaticParams() {
     select: { slug: true },
   });
   return posts.map((p) => ({ slug: p.slug }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const dbPost = await prisma.post.findUnique({ where: { slug } });
+  if (!dbPost || dbPost.status !== "PUBLISHED") return {};
+
+  return {
+    title: dbPost.title,
+    description: dbPost.excerpt,
+    alternates: { canonical: `/post/${slug}` },
+    openGraph: {
+      title: dbPost.title,
+      description: dbPost.excerpt,
+      url: `/post/${slug}`,
+      type: "article",
+      images: dbPost.coverImage ? [dbPost.coverImage] : undefined,
+    },
+  };
 }
 
 export default async function PostPage({ params }: Props) {
@@ -38,6 +59,17 @@ export default async function PostPage({ params }: Props) {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: post.title,
+          description: post.excerpt,
+          image: post.coverImage,
+          datePublished: post.publishedDate,
+          author: { "@type": "Person", name: post.author.name },
+        }}
+      />
       <Header config={siteConfig} />
       <main className="flex-1 mx-auto max-w-3xl px-4 py-10 w-full">
         <Breadcrumb crumbs={crumbs} />

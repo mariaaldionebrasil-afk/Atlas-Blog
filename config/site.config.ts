@@ -3,7 +3,7 @@ import { categories } from "../lib/mock-data";
 
 const siteConfig: SiteConfig = {
   siteName: "Atlas Blog Demo",
-  domain: "atlasblog.demo",
+  domain: "drviniciusazevedo.com.br",
   menu: [
     { label: "Home", href: "/" },
     { label: "Blog", href: "/blog" },

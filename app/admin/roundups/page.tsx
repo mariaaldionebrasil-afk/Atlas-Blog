@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
 import { RoundupsPanel } from './RoundupsPanel';
+import { SocialPublishBadge } from '@/components/SocialPublishBadge';
 
 const statusLabel: Record<string, string> = {
   DRAFT: 'Rascunho',
@@ -13,7 +14,11 @@ export default async function AdminRoundupsPage() {
     prisma.silo.findMany({ where: { type: 'PILAR' }, orderBy: { name: 'asc' } }),
     prisma.author.findMany({ orderBy: { name: 'asc' } }),
     prisma.roundup.findMany({
-      include: { author: true, items: true },
+      include: {
+        author: true,
+        items: true,
+        socialPublications: { where: { status: 'FAILED' } },
+      },
       orderBy: { createdAt: 'desc' },
     }),
   ]);
@@ -52,7 +57,10 @@ export default async function AdminRoundupsPage() {
                 </td>
                 <td className="px-4 py-3 text-gray-600">{roundup.author.name}</td>
                 <td className="px-4 py-3 text-gray-600">{roundup.items.length}</td>
-                <td className="px-4 py-3 text-gray-600">{statusLabel[roundup.status]}</td>
+                <td className="px-4 py-3 text-gray-600">
+                  {statusLabel[roundup.status]}
+                  <SocialPublishBadge failures={roundup.socialPublications} />
+                </td>
               </tr>
             ))}
           </tbody>

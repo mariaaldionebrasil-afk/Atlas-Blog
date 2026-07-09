@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
+import { SocialPublishBadge } from '@/components/SocialPublishBadge';
 
 type Props = {
   searchParams: Promise<{ status?: string }>;
@@ -16,7 +17,10 @@ export default async function AdminReviewsPage({ searchParams }: Props) {
 
   const reviews = await prisma.review.findMany({
     where: filter ? { status: filter } : undefined,
-    include: { author: true },
+    include: {
+      author: true,
+      socialPublications: { where: { status: 'FAILED' } },
+    },
   });
 
   const filters = [
@@ -83,6 +87,7 @@ export default async function AdminReviewsPage({ searchParams }: Props) {
                   >
                     {statusLabel[review.status]}
                   </span>
+                  <SocialPublishBadge failures={review.socialPublications} />
                 </td>
               </tr>
             ))}
