@@ -56,6 +56,18 @@ export async function checkCannibalization() {
 
   const prompt = `Analise esta lista de keywords de SEO e identifique quais têm intenção de busca sobreposta (canibalização) — ou seja, keywords diferentes que competiriam pela mesma página/artigo no Google. Agrupe apenas as que realmente conflitam entre si. Ignore as que não têm conflito.
 
+Ao avaliar se duas keywords competem entre si (canibalização), considere
+que keywords de cauda longa com ângulos de busca DIFERENTES não são
+canibalização, mesmo compartilhando o mesmo tema geral. Exemplos que
+NÃO são canibalização: "X emagrece" vs "X para iniciantes" vs "quantas
+calorias X queima" — são ângulos distintos que merecem artigos
+separados. Só sinalize canibalização quando as duas keywords
+claramente disputariam a MESMA página para satisfazer a MESMA
+intenção de busca (ex: "melhor X" e "X mais vendido" são
+essencialmente a mesma busca). Na dúvida, NÃO sinalize — prefira
+falso-negativo a falso-positivo, já que descartar uma keyword válida
+custa mais que manter uma competição leve.
+
 Keywords:
 ${keywords
   .map((k) => `- id: ${k.id} | termo: "${k.term}" | intenção: ${k.searchIntent ?? 'não informada'} | volume: ${k.volume ?? '?'}`)

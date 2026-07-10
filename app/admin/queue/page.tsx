@@ -14,8 +14,8 @@ export default async function AdminQueuePage() {
       id: p.id,
       title: p.title,
       excerpt: p.excerpt,
-      category: p.category.name,
-      author: p.author.name,
+      category: p.category?.name ?? '—',
+      author: p.author?.name ?? '—',
     }));
 
   return (

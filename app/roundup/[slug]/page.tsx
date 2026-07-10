@@ -114,7 +114,9 @@ export default async function RoundupPage({ params }: Props) {
                     </div>
                   </td>
                   <td className="py-3 pr-4 text-gray-600">{item.review.price ?? "—"}</td>
-                  <td className="py-3 pr-4 text-gray-600">{item.review.rating}/5</td>
+                  <td className="py-3 pr-4 text-gray-600">
+                    {item.review.rating != null ? `${item.review.rating}/5` : "—"}
+                  </td>
                   <td className="py-3 pr-4">
                     <div className="flex flex-wrap gap-2">
                       {item.review.affiliateLinkAmazon && (
@@ -140,9 +142,9 @@ export default async function RoundupPage({ params }: Props) {
           ))}
         </article>
 
-        <div className="mt-10 space-y-8">
+        <div className="mt-10 space-y-12">
           {items.map((item, index) => (
-            <div key={item.id} className="rounded-lg border border-gray-200 bg-white p-5">
+            <div key={item.id} className="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
               <h3 className="text-lg font-bold text-gray-900">
                 #{index + 1} {item.review.productName}
               </h3>
@@ -167,12 +169,20 @@ export default async function RoundupPage({ params }: Props) {
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-wrap items-center gap-3">
+              {item.review.rating != null && (
+                <p className="mt-4 text-sm font-medium text-gray-600">{item.review.rating}/5</p>
+              )}
+
+              <div className="mt-2 flex flex-wrap items-center gap-3">
                 {item.review.affiliateLinkAmazon && (
-                  <AffiliateButton label="Ver na Amazon" url={item.review.affiliateLinkAmazon} />
+                  <AffiliateButton label="Ver na Amazon" url={item.review.affiliateLinkAmazon} variant="primary" />
                 )}
                 {item.review.affiliateLinkMercadoLivre && (
-                  <AffiliateButton label="Ver no Mercado Livre" url={item.review.affiliateLinkMercadoLivre} />
+                  <AffiliateButton
+                    label="Ver no Mercado Livre"
+                    url={item.review.affiliateLinkMercadoLivre}
+                    variant="secondary"
+                  />
                 )}
                 <Link href={`/review/${item.review.slug}`} className="text-sm text-blue-600 hover:underline">
                   Ver review completo →

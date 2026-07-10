@@ -28,10 +28,31 @@ export async function generateFullArticle(postId: string) {
 
 ${outline.map((t) => `${t.level}: ${t.text}`).join('\n')}
 
+Ao escrever cada seção H2/H3, identifique que tipo de busca aquela
+seção está respondendo e use o formato correspondente:
+
+- "Como fazer/montar/limpar X" → lista numerada, 5 a 8 passos, cada
+  item começando com verbo de ação, uma frase por passo
+- "O que é X" / "X faz Y?" → parágrafo direto de 40-60 palavras
+  IMEDIATAMENTE após o heading, sem introdução tipo "vamos explicar..."
+- "Melhor X" → lista com marcadores + tabela comparativa
+- "X vs Y" → tabela HTML limpa, headers descritivos, sem células
+  mescladas
+- Avaliação de produto → critérios explícitos, evidência concreta,
+  limitações honestas, CTA progressivo (não força venda logo de cara)
+
+REGRA OBRIGATÓRIA: cada seção H2 responde exatamente 1 pergunta ou
+subtema. Nunca combine 2 perguntas diferentes sob o mesmo heading —
+separe em headings distintos. A resposta direta deve aparecer nos
+primeiros 100-150 palavras da seção, sem preâmbulo.
+
+Formato predominante indicado para este artigo: ${post.searchIntentFormat ?? 'não especificado — use o julgamento das regras acima por seção'}.
+
 Regras:
-- Para CADA item do outline, insira primeiro um bloco do tipo "heading" com o "level" (H2 ou H3) e o "text" exatamente como no outline, e só depois os blocos "paragraph" com o conteúdo daquela seção.
+- Para CADA item do outline, insira primeiro um bloco do tipo "heading" com o "level" (H2 ou H3) e o "text" exatamente como no outline, e só depois os blocos "paragraph" (ou "table", quando a seção pedir tabela) com o conteúdo daquela seção.
 - Escreva em português do Brasil, tom acessível e informativo, cobrindo todos os tópicos do outline.
 - Cada bloco "paragraph" deve ter 2 a 5 frases.
+- Quando a seção pedir tabela (formato "Melhor X" ou "X vs Y"), insira um bloco do tipo "table" com o "html" contendo uma tag <table> completa (com <thead>/<tbody>, sem células mescladas) em vez de um bloco "paragraph".
 - Em 1 a 3 pontos do artigo onde uma imagem ilustrativa faria sentido, insira um bloco do tipo "image" no lugar apropriado, com um prompt descritivo em inglês (para gerar a imagem) e um alt text em português.
 - Gere também um "title" (título chamativo e otimizado para SEO, diferente do termo de busca cru) e um "excerpt" (resumo curto, 1-2 frases, para meta description).
 
@@ -52,11 +73,12 @@ Responda em JSON.`;
             items: {
               type: Type.OBJECT,
               properties: {
-                type: { type: Type.STRING, enum: ['heading', 'paragraph', 'image'] },
+                type: { type: Type.STRING, enum: ['heading', 'paragraph', 'image', 'table'] },
                 level: { type: Type.STRING, enum: ['H2', 'H3'], nullable: true },
                 text: { type: Type.STRING, nullable: true },
                 prompt: { type: Type.STRING, nullable: true },
                 alt: { type: Type.STRING, nullable: true },
+                html: { type: Type.STRING, nullable: true },
               },
               required: ['type'],
             },
@@ -74,11 +96,12 @@ Responda em JSON.`;
     title: string;
     excerpt: string;
     blocks: {
-      type: 'heading' | 'paragraph' | 'image';
+      type: 'heading' | 'paragraph' | 'image' | 'table';
       level?: 'H2' | 'H3';
       text?: string;
       prompt?: string;
       alt?: string;
+      html?: string;
     }[];
   };
   try {
@@ -97,6 +120,8 @@ Responda em JSON.`;
       contentParts.push(`${prefix} ${block.text}`);
     } else if (block.type === 'paragraph' && block.text) {
       contentParts.push(block.text);
+    } else if (block.type === 'table' && block.html) {
+      contentParts.push(block.html);
     } else if (block.type === 'image' && block.prompt) {
       try {
         const url = await generateImage(supabase, block.prompt, `article-${postId}`);

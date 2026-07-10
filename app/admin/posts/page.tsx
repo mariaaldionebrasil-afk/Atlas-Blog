@@ -86,8 +86,8 @@ export default async function AdminPostsPage({ searchParams }: Props) {
                     {post.title}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-gray-600">{post.category.name}</td>
-                <td className="px-4 py-3 text-gray-600">{post.author.name}</td>
+                <td className="px-4 py-3 text-gray-600">{post.category?.name ?? '—'}</td>
+                <td className="px-4 py-3 text-gray-600">{post.author?.name ?? '—'}</td>
                 <td className="px-4 py-3">
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColor[post.status]}`}>
                     {statusLabel[post.status]}

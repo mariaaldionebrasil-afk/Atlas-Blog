@@ -55,7 +55,7 @@ export default async function AdminRoundupsPage() {
                     {roundup.title}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-gray-600">{roundup.author.name}</td>
+                <td className="px-4 py-3 text-gray-600">{roundup.author?.name ?? '—'}</td>
                 <td className="px-4 py-3 text-gray-600">{roundup.items.length}</td>
                 <td className="px-4 py-3 text-gray-600">
                   {statusLabel[roundup.status]}

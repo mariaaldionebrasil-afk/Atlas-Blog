@@ -7,7 +7,7 @@ type Option = { id: string; name: string };
 
 type Props = {
   keywordId: string;
-  existingPost: { id: string; categoryId: string; authorId: string; outline: OutlineTopic[] } | null;
+  existingPost: { id: string; categoryId: string | null; authorId: string | null; outline: OutlineTopic[] } | null;
   categories: Option[];
   authors: Option[];
 };

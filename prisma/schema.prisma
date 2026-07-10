@@ -46,6 +46,12 @@ enum KeywordStatus {
   REMOVIDA
 }
 
+enum PostType {
+  APOIO
+  INFORMACIONAL
+  COMPARACAO
+}
+
 model Keyword {
   id                  String        @id @default(uuid())
   term                String
@@ -58,6 +64,7 @@ model Keyword {
   siloId              String?
   posts               Post[]
   reviews             Review[]
+  roundups            Roundup[]
   createdAt           DateTime      @default(now())
 }
 
@@ -72,30 +79,40 @@ model Silo {
 }
 
 model Post {
-  id                 String              @id @default(uuid())
-  slug               String              @unique
-  title              String
-  excerpt            String
-  content            String
-  publishedDate      DateTime
-  coverImage         String?
-  status             ContentStatus       @default(DRAFT)
-  category           Category            @relation(fields: [categoryId], references: [id])
-  categoryId         String
-  author             Author              @relation(fields: [authorId], references: [id])
-  authorId           String
-  keyword            Keyword?            @relation(fields: [keywordId], references: [id])
-  keywordId          String?
-  outline            Json?
-  scheduledDate      DateTime?
-  socialPublications SocialPublication[]
+  id                        String              @id @default(uuid())
+  slug                      String              @unique
+  title                     String
+  excerpt                   String
+  content                   String
+  publishedDate             DateTime?
+  coverImage                String?
+  status                    ContentStatus       @default(DRAFT)
+  category                  Category?           @relation(fields: [categoryId], references: [id])
+  categoryId                String?
+  author                    Author?             @relation(fields: [authorId], references: [id])
+  authorId                  String?
+  keyword                   Keyword?            @relation(fields: [keywordId], references: [id])
+  keywordId                 String?
+  outline                   Json?
+  scheduledDate             DateTime?
+  socialPublications        SocialPublication[]
+  postType                  PostType?
+  affiliateLinkAmazon       String?
+  affiliateLinkMercadoLivre String?
+  comparedReviewIdA         String?
+  comparedReviewIdB         String?
+  comparedReviewA           Review?             @relation("ComparisonA", fields: [comparedReviewIdA], references: [id])
+  comparedReviewB           Review?             @relation("ComparisonB", fields: [comparedReviewIdB], references: [id])
+  searchIntentFormat        String?
+  roundupId                 String?
+  roundup                   Roundup?            @relation(fields: [roundupId], references: [id])
 }
 
 model Review {
   id                        String              @id @default(uuid())
   slug                      String              @unique
   productName                String
-  rating                    Float
+  rating                    Float?
   summary                   String
   content                   String
   pros                      String[]
@@ -103,8 +120,8 @@ model Review {
   coverImage                String?
   price                     String?
   status                    ContentStatus       @default(DRAFT)
-  author                    Author              @relation(fields: [authorId], references: [id])
-  authorId                  String
+  author                    Author?             @relation(fields: [authorId], references: [id])
+  authorId                  String?
   sourceUrls                Json?
   keyword                   Keyword?            @relation(fields: [keywordId], references: [id])
   keywordId                 String?
@@ -113,6 +130,9 @@ model Review {
   affiliateLinkMercadoLivre String?
   roundupItems              RoundupItem[]
   socialPublications        SocialPublication[]
+  comparisonsAsA            Post[]              @relation("ComparisonA")
+  comparisonsAsB            Post[]              @relation("ComparisonB")
+  searchIntentFormat        String?
 }
 
 model Roundup {
@@ -124,11 +144,15 @@ model Roundup {
   faq                Json?
   status             ContentStatus       @default(DRAFT)
   scheduledDate      DateTime?
-  author             Author              @relation(fields: [authorId], references: [id])
-  authorId           String
+  author             Author?             @relation(fields: [authorId], references: [id])
+  authorId           String?
   items              RoundupItem[]
   createdAt          DateTime            @default(now())
   socialPublications SocialPublication[]
+  posts              Post[]
+  keywordId          String?
+  keyword            Keyword?            @relation(fields: [keywordId], references: [id])
+  searchIntentFormat String?
 }
 
 model RoundupItem {

@@ -150,6 +150,134 @@ Todo link de afiliado (Amazon, Mercado Livre) deve ter os atributos `rel="sponso
 
 ---
 
+## Melhorias futuras (backlog, não bloqueiam o fluxo atual)
+
+- **Importação de planilha (CSV/XLSX)** para Keywords, além da colagem manual em texto — útil quando as listas vierem de ferramentas de keyword research em volume maior. Adicionar quando o volume de importação justificar o esforço.
+- **Calibrar o prompt de checagem de canibalização**: observado em teste que a IA tende a sinalizar canibalização com frequência alta, inclusive entre keywords com ângulos de busca claramente diferentes (ex: "emagrece" vs "para iniciantes" vs "quantas calorias queima" — todas cauda longa, mas com intenções distintas o suficiente pra justificar artigos separados). Ajustar o prompt para ser mais criterioso, evitando falso-positivo que descartaria conteúdo de Satélite válido.
+- **Campo de preço no Review/Roundup**: campo `price` (opcional, String) adicionado ao Review. Preenchimento manual por enquanto. Quando a API de e-commerce/afiliado for liberada, trocar para preenchimento automático via API — sem necessidade de nova migration, só mudar a lógica de preenchimento.
+- **Renovação automática do token do Meta (Facebook/Instagram)**: descoberto que o token de acesso de longa duração do Meta expira a cada 60 dias — não é configuração única. É necessário um job agendado (pode reaproveitar o mesmo mecanismo de cron) que renove o token antes de expirar, e um alerta/log se a renovação falhar, para não descobrir que a publicação parou de funcionar só quando um post não sair do jeito esperado.
+- **Contas sociais: modelo simplificado (1 conta única por rede)**: decisão revisada — não haverá múltiplas Páginas por categoria. O blog terá apenas 1 Página do Facebook, 1 conta do Instagram e 1 conta do Pinterest, todas vinculadas à marca "Dr. Vinicius Azevedo". Token e IDs ficam fixos em variáveis de ambiente (`FACEBOOK_PAGE_ID`, `FACEBOOK_ACCESS_TOKEN`, `INSTAGRAM_BUSINESS_ACCOUNT_ID`, `PINTEREST_ACCESS_TOKEN`), sem seletor de página na hora de publicar.
+
+---
+
+- **Regra de classificação no Silo para nichos de review/produto**: esclarecido que, para conteúdo de review, o nível **Apoio** do silo corresponde a artigos tipo "Melhores X do mercado" (que devem virar **Roundup**), e o nível **Satélite** corresponde a reviews de produtos/marcas individuais específicos (que devem virar **Review** individual, sempre vinculados ao Roundup do Apoio correspondente). Exemplo: Apoio "As Melhores TVs HD do Mercado" (Roundup) → Satélites "Samsung TV X Review", "LG TV Y Review", etc. (Reviews individuais, 6-8 por Roundup tipicamente). O prompt de geração de estrutura de silo deve ser ajustado para aplicar essa regra automaticamente ao classificar keywords de nicho de produto, em vez de classificar livremente.
+
 ## Pendente / aguardando mais ideias da pessoa
 
 Este documento será atualizado conforme novas decisões forem tomadas, antes de virar o Documento 6 (prompt de execução).
+
+---
+---
+
+# ARQUITETURA REVISADA (sessão de definição — substitui/refina o modelo Pilar/Apoio/Satélite genérico anterior nas seções acima)
+
+> Nota de nomenclatura: "Silo" tem dois usos formalizados abaixo — **Silo** (modelo de dados) é o agrupamento temático abstrato de keywords (já existente). **Artigo Silo** é o apelido de exibição no painel para o modelo de dados `Roundup` (já existente, sem necessidade de renomear a tabela) — o artigo que lista os produtos e referencia os Single Product Reviews.
+
+## Os 5 tipos de conteúdo (glossário fechado)
+
+1. **Single Product Review** (modelo `Review`) — review de 1 produto único (marca+modelo), aprofundado. Tem link de afiliado (Amazon e/ou Mercado Livre).
+2. **Artigo Silo** (modelo `Roundup`) — lista de 1 a 15 produtos (quantidade configurável), cada um referenciando um Single Product Review existente. Comercial.
+3. **Apoio** (modelo `Post`, campo tipo=APOIO) — recorte comercial mais estreito do nicho (ex: "Qual o Melhor Frigobar Retrô"). Tem link de afiliado para 1 produto específico (que também está listado no Artigo Silo).
+4. **Informacional** (modelo `Post`, campo tipo=INFORMACIONAL) — conteúdo puro, sem CTA de afiliado, sem o campo de link sequer aparecer no formulário.
+5. **Comparação** (modelo `Post`, campo tipo=COMPARACAO) — "Produto A vs Produto B", só criado quando há demanda de busca real e comprovada para aquele par específico (nunca gerado por combinatória entre os N produtos do silo). Linka para os 2 Single Product Reviews comparados + para o Artigo Silo.
+
+## Meta de proporção de conteúdo
+
+~70% dos artigos satélite de um Silo devem ser Informacionais, ~30% comerciais (Single Product Review + Apoio + Comparação), refletindo a distribuição real de intenção de busca (dado de mercado: ~70% das buscas são informacionais).
+
+## Regras de linkagem interna (obrigatórias no prompt de geração)
+
+- **Artigo Silo ↔ Single Product Review**: bidirecional (Silo linka para cada produto listado; cada produto linka de volta para o Silo)
+- **Apoio → Artigo Silo**: unidirecional (Apoio linka para o Silo; Silo não linka de volta)
+- **Informacional → Artigo Silo**: unidirecional (mesma lógica do Apoio)
+- **Comparação → Artigo Silo + 2 Single Product Reviews comparados**: unidirecional para o Silo; pode linkar para os 2 reviews comparados
+- **Single Product Reviews não linkam lateralmente entre si** (decisão revisada — descartado o modelo de "circular chain")
+- **Silos diferentes nunca linkam entre si** (preserva força de sinal temático de cada silo)
+
+## Ordem de criação (respeita dependência de link)
+
+```
+1º — Single Product Reviews (todos os produtos do silo)
+2º — Artigo Silo (depende do 1º, referencia os produtos)
+3º — Apoio, Informacional, Comparação (dependem do 2º; Comparação também do 1º)
+```
+
+## Formato de conteúdo por tipo de busca (força correspondência ao formato de featured snippet do Google, não deixado à IA)
+
+| Tipo de busca | Formato exigido | Aplica-se a |
+|---|---|---|
+| "Como fazer/montar/limpar X" | Lista numerada, 5-8 passos | Informacional (processo) |
+| "O que é X" / "X faz Y?" | Parágrafo direto, 40-60 palavras, resposta logo após o H2 | Informacional (definição) |
+| "Melhor X" | Lista com marcadores + tabela comparativa | Artigo Silo, Apoio |
+| "X vs Y" | Tabela | Comparação |
+| Avaliação de produto | Critérios explícitos + evidência + limitações + CTA progressivo | Single Product Review |
+
+Regra geral: cada seção H2 responde exatamente 1 pergunta/subtema (nunca combinar 2 perguntas num heading); resposta direta nos primeiros 100-150 palavras da seção, sem preâmbulo.
+
+## Layout visual do Artigo Silo (lista de produtos)
+
+```
+H1 + snippet (meta description)
+Disclosure de afiliado (topo, primeira tela)
+Resumo rápido da escolha #1
+Tabela comparativa (imagem, nome, nota, botões CTA)
+Texto de introdução sobre a categoria
+Para cada produto (espaçamento generoso entre eles):
+  - Imagem grande
+  - Resenha curta + prós/contras
+  - 2 botões de CTA (Amazon/Mercado Livre) com HIERARQUIA VISUAL
+    (1 primário com mais destaque, 1 secundário mais discreto —
+    não os dois com peso visual igual)
+  - Linha curta de confiança acima do CTA (nota, frete, garantia — se houver dado)
+  - Link "Ver review completo" → Single Product Review
+FAQ (se gerado)
+```
+
+Todo link de afiliado usa `rel="sponsored nofollow"` (já implementado no componente `AffiliateButton`).
+
+## Fluxo de telas no painel (revisão do fluxo original)
+
+```
+1. Gerar Estrutura
+   Pessoa digita 1 keyword semente → IA gera árvore completa
+   (Single Product Reviews + Artigo Silo + Apoio + Informacional + Comparação,
+   já com keywords definidas e tipo classificado, respeitando a proporção 70/30
+   e o filtro de demanda real para Comparação)
+   Pessoa aprova a estrutura
+
+2. Fila de Criação
+   Lista todos os artigos do Silo, na ordem de dependência (ver acima)
+   Cada item abre formulário inline com campos que variam por tipo:
+   título, tópicos (outline editável), imagens, produtos/links de afiliado
+   (regras de obrigatoriedade por tipo — ver tabela), categoria, autor
+   Pessoa edita/aprova tópicos antes da geração do texto completo
+   (funciona como gate de qualidade para todos os tipos, incluindo Informacional)
+   Ao salvar, artigo sai da Fila de Criação
+
+3. Fila de Publicação
+   Lista artigos com conteúdo já gerado
+   Pessoa agenda dia/hora de cada um
+   Sistema não permite agendar um item antes de suas dependências de link
+   (ex: não deixa agendar Artigo Silo antes de todos os Single Product
+   Reviews que ele referencia estarem, no mínimo, também agendados)
+
+4. Após salvar/aprovar uma estrutura completa, a tela de Gerar Estrutura
+   reseta, pronta para uma nova keyword semente (novo Silo, sem relação
+   com os anteriores) — permite alimentar o blog com múltiplos nichos
+   ao longo do tempo, cada um como Silo independente
+```
+
+Menu lateral revisado: Dashboard, Keywords, Gerar Estrutura, Fila de Criação, Fila de Publicação, Categorias, Autores. As telas antigas (`/admin/posts`, `/admin/reviews`, `/admin/roundups`) continuam existindo como modelos de dados por baixo, mas a navegação principal do dia a dia passa a ser pela Fila de Criação, não por essas telas individualmente.
+
+## Chave de API dedicada
+
+`GEMINI_STRUCTURE_API_KEY` — chave separada das já existentes (texto/imagem), usada especificamente para a geração da árvore de estrutura (Gerar Estrutura), permitindo rastrear custo dessa função isoladamente.
+
+## Princípio de supervisão humana (reafirmado)
+
+A estrutura não é gerada de forma autônoma pela IA — a pessoa fornece a keyword semente e revisa/aprova a estrutura proposta antes de qualquer conteúdo ser gerado. A IA aplica as regras documentadas acima; não decide a arquitetura. Isso é consistente com os checkpoints humanos já existentes no pipeline (aprovação de keyword, canibalização, estrutura, tópicos, fontes de review).
+
+## Pendências conscientemente adiadas
+
+- **Revisão de segurança da `SUPABASE_SERVICE_ROLE_KEY`**: usada na automação do cron (Documento 8) para operações sem sessão humana (upload de imagem, etc.). Sistema não é multi-usuário no momento. Revisão de segurança formal fica agendada para quando o sistema estiver em operação real, não antes.
+- **Gate de qualidade para Informacional**: avaliado e decidido que não é necessário replicar a checagem obrigatória de fontes (como existe para Review) — a curadoria manual de tópicos pela pessoa antes da geração do texto completo já cumpre esse papel.

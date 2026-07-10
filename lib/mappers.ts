@@ -5,27 +5,30 @@ type PrismaCategory = { slug: string; name: string; description: string | null }
 
 type PrismaPost = {
   slug: string; title: string; excerpt: string; content: string;
-  publishedDate: Date; coverImage: string | null;
-  author: PrismaAuthor; category: PrismaCategory;
+  publishedDate: Date | null; coverImage: string | null;
+  author: PrismaAuthor | null; category: PrismaCategory | null;
 };
 
 type PrismaReview = {
-  slug: string; productName: string; rating: number; summary: string;
+  slug: string; productName: string; rating: number | null; summary: string;
   content: string; pros: string[]; cons: string[]; coverImage: string | null;
-  author: PrismaAuthor;
+  author: PrismaAuthor | null;
   affiliateLinkAmazon: string | null; affiliateLinkMercadoLivre: string | null;
 };
 
+// Post/Review passados aqui já foram filtrados por status: 'PUBLISHED' pelo
+// caller — author/categoria/rating só ficam nulos em esqueletos DRAFT criados
+// pela Etapa 3 do Documento 9 (Fila de Criação os preenche antes de publicar).
 export function mapPost(p: PrismaPost): Post {
   return {
     slug: p.slug,
     title: p.title,
     excerpt: p.excerpt,
     content: p.content,
-    category: p.category.slug,
-    publishedDate: p.publishedDate.toISOString().split("T")[0],
+    category: p.category!.slug,
+    publishedDate: p.publishedDate!.toISOString().split("T")[0],
     coverImage: p.coverImage ?? undefined,
-    author: mapAuthor(p.author),
+    author: mapAuthor(p.author!),
   };
 }
 
@@ -33,13 +36,13 @@ export function mapReview(r: PrismaReview): Review {
   return {
     slug: r.slug,
     productName: r.productName,
-    rating: r.rating,
+    rating: r.rating!,
     summary: r.summary,
     content: r.content,
     pros: r.pros,
     cons: r.cons,
     coverImage: r.coverImage ?? undefined,
-    author: mapAuthor(r.author),
+    author: mapAuthor(r.author!),
     affiliateLinkAmazon: r.affiliateLinkAmazon ?? undefined,
     affiliateLinkMercadoLivre: r.affiliateLinkMercadoLivre ?? undefined,
   };

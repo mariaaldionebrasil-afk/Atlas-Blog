@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import Breadcrumb from "../../../components/Breadcrumb";
 import AuthorBio from "../../../components/AuthorBio";
+import AffiliateButton from "../../../components/AffiliateButton";
+import GuideCallout from "../../../components/GuideCallout";
 import siteConfig from "../../../config/site.config";
 import { prisma } from "../../../lib/prisma";
 import { mapPost } from "../../../lib/mappers";
@@ -45,11 +48,21 @@ export default async function PostPage({ params }: Props) {
   const { slug } = await params;
   const dbPost = await prisma.post.findUnique({
     where: { slug },
-    include: { author: true, category: true },
+    include: {
+      author: true,
+      category: true,
+      roundup: true,
+      comparedReviewA: true,
+      comparedReviewB: true,
+    },
   });
   if (!dbPost || dbPost.status !== "PUBLISHED") notFound();
 
   const post = mapPost(dbPost);
+
+  const firstBreak = dbPost.content.indexOf("\n\n");
+  const introRaw = firstBreak === -1 ? dbPost.content : dbPost.content.slice(0, firstBreak);
+  const restRaw = firstBreak === -1 ? "" : dbPost.content.slice(firstBreak + 2);
 
   const crumbs = [
     { label: "Home", href: "/" },
@@ -80,8 +93,35 @@ export default async function PostPage({ params }: Props) {
         <time className="mt-2 block text-sm text-gray-400">{post.publishedDate}</time>
         <p className="mt-4 text-lg text-gray-600 border-l-4 border-blue-200 pl-4 italic">{post.excerpt}</p>
         <article className="mt-8 space-y-4 text-gray-700 leading-relaxed">
-          {renderContentParagraphs(post.content)}
+          {renderContentParagraphs(introRaw, "intro-")}
+          {dbPost.postType && dbPost.roundup && (
+            <GuideCallout roundupTitle={dbPost.roundup.title} roundupSlug={dbPost.roundup.slug} />
+          )}
+          {restRaw && renderContentParagraphs(restRaw, "rest-")}
         </article>
+
+        {dbPost.postType === "COMPARACAO" && dbPost.comparedReviewA && dbPost.comparedReviewB && (
+          <div className="mt-4 flex flex-wrap gap-4 text-sm">
+            <Link href={`/review/${dbPost.comparedReviewA.slug}`} className="text-blue-600 hover:underline">
+              Ver review completo da {dbPost.comparedReviewA.productName} →
+            </Link>
+            <Link href={`/review/${dbPost.comparedReviewB.slug}`} className="text-blue-600 hover:underline">
+              Ver review completo da {dbPost.comparedReviewB.productName} →
+            </Link>
+          </div>
+        )}
+
+        {dbPost.postType === "APOIO" && (dbPost.affiliateLinkAmazon || dbPost.affiliateLinkMercadoLivre) && (
+          <div className="mt-6 flex flex-wrap gap-3">
+            {dbPost.affiliateLinkAmazon && (
+              <AffiliateButton label="Ver na Amazon" url={dbPost.affiliateLinkAmazon} />
+            )}
+            {dbPost.affiliateLinkMercadoLivre && (
+              <AffiliateButton label="Ver no Mercado Livre" url={dbPost.affiliateLinkMercadoLivre} />
+            )}
+          </div>
+        )}
+
         <AuthorBio author={post.author} />
       </main>
       <Footer config={siteConfig} />

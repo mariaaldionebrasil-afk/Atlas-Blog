@@ -18,7 +18,7 @@ async function requireAdmin() {
 export type EligibleReview = {
   id: string;
   productName: string;
-  rating: number;
+  rating: number | null;
   summary: string;
 };
 

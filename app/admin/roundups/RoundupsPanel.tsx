@@ -132,7 +132,7 @@ export function RoundupsPanel({ pilares, authors }: Props) {
                   />
                   <span>
                     <span className="font-medium text-gray-900">{review.productName}</span>{' '}
-                    <span className="text-gray-500">({review.rating}/5)</span>
+                    <span className="text-gray-500">({review.rating != null ? `${review.rating}/5` : 'sem nota'})</span>
                     <br />
                     <span className="text-gray-500">{review.summary}</span>
                   </span>

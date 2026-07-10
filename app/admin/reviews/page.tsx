@@ -75,8 +75,8 @@ export default async function AdminReviewsPage({ searchParams }: Props) {
                     {review.productName}
                   </Link>
                 </td>
-                <td className="px-4 py-3 text-gray-600">{review.rating}/5</td>
-                <td className="px-4 py-3 text-gray-600">{review.author.name}</td>
+                <td className="px-4 py-3 text-gray-600">{review.rating != null ? `${review.rating}/5` : '—'}</td>
+                <td className="px-4 py-3 text-gray-600">{review.author?.name ?? '—'}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${

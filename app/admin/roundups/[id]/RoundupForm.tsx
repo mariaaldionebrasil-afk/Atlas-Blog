@@ -10,7 +10,7 @@ export type RoundupItemView = {
   id: string;
   reviewId: string;
   productName: string;
-  rating: number;
+  rating: number | null;
   reviewSlug: string;
 };
 
@@ -149,7 +149,7 @@ export function RoundupForm({ roundupId, status, title: initialTitle, slug: init
               <span className="w-6 text-sm font-semibold text-gray-400">#{index + 1}</span>
               <div className="flex-1 text-sm">
                 <span className="font-medium text-gray-900">{item.productName}</span>{' '}
-                <span className="text-gray-500">({item.rating}/5)</span>
+                <span className="text-gray-500">({item.rating != null ? `${item.rating}/5` : 'sem nota'})</span>
               </div>
               <Link
                 href={`/admin/reviews/${item.reviewId}`}
