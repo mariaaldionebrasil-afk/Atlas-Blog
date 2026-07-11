@@ -9,7 +9,7 @@ import AboutTeaser from "../components/AboutTeaser";
 import siteConfig from "../config/site.config";
 import Link from "next/link";
 import { prisma } from "../lib/prisma";
-import { mapPost, mapReview } from "../lib/mappers";
+import { mapPost, mapReview, mapAuthor } from "../lib/mappers";
 import { JsonLd } from "../components/JsonLd";
 
 export const metadata: Metadata = {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [dbPosts, dbReviews, categories] = await Promise.all([
+  const [dbPosts, dbReviews, categories, dbAuthors] = await Promise.all([
     prisma.post.findMany({
       where: { status: "PUBLISHED" },
       include: { author: true, category: true },
@@ -37,10 +37,12 @@ export default async function HomePage() {
       include: { author: true },
     }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.author.findMany(),
   ]);
 
   const recentPosts = dbPosts.map(mapPost);
   const reviews = dbReviews.map(mapReview);
+  const authors = dbAuthors.map(mapAuthor);
 
   return (
     <>
@@ -85,7 +87,7 @@ export default async function HomePage() {
               categories={categories.map((c) => ({ ...c, description: c.description ?? undefined }))}
             />
           )}
-          <AboutTeaser siteName={siteConfig.siteName} />
+          <AboutTeaser siteName={siteConfig.siteName} authors={authors} />
         </div>
       </main>
       <Footer config={siteConfig} />

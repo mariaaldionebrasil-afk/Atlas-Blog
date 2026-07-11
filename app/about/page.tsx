@@ -54,8 +54,12 @@ export default async function AboutPage() {
             {authors.map((author) => (
               <div key={author.slug} className="border border-gray-200 rounded-lg p-6">
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-500">
-                    {author.name.charAt(0)}
+                  <div className="flex-shrink-0 w-14 h-14 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center text-xl font-bold text-gray-500">
+                    {author.avatar ? (
+                      <img src={author.avatar} alt={author.name} className="h-full w-full object-cover" />
+                    ) : (
+                      author.name.charAt(0)
+                    )}
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900 text-lg">{author.name}</p>

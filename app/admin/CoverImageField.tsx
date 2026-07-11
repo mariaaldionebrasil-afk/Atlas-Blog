@@ -1,7 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { generateCoverImageAction } from './generate-cover-action';
+import { uploadCoverImageAction } from './upload-cover-action';
+
+const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
+const MAX_SIZE = 5 * 1024 * 1024;
 
 type Props = {
   value: string;
@@ -10,11 +14,13 @@ type Props = {
 };
 
 export function CoverImageField({ value, onChange, label = 'Imagem de capa' }: Props) {
-  const [mode, setMode] = useState<'idle' | 'ai' | 'manual'>('idle');
+  const [mode, setMode] = useState<'idle' | 'ai' | 'manual' | 'upload'>('idle');
   const [prompt, setPrompt] = useState('');
   const [manualUrl, setManualUrl] = useState(value);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleGenerate() {
     setPending(true);
@@ -34,6 +40,33 @@ export function CoverImageField({ value, onChange, label = 'Imagem de capa' }: P
 
   function handleManualSave() {
     onChange(manualUrl.trim());
+    setMode('idle');
+  }
+
+  async function handleFile(file: File) {
+    setError(null);
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setError('Formato inválido. Use PNG, JPEG ou WEBP.');
+      return;
+    }
+    if (file.size > MAX_SIZE) {
+      setError('Arquivo muito grande. O limite é 5MB.');
+      return;
+    }
+
+    setPending(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    const result = await uploadCoverImageAction(formData);
+    setPending(false);
+
+    if (result.error || !result.url) {
+      setError(result.error ?? 'Erro ao enviar imagem.');
+      return;
+    }
+
+    onChange(result.url);
     setMode('idle');
   }
 
@@ -64,6 +97,13 @@ export function CoverImageField({ value, onChange, label = 'Imagem de capa' }: P
             className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
           >
             Colar URL manual
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('upload')}
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Fazer upload
           </button>
         </div>
       )}
@@ -123,6 +163,50 @@ export function CoverImageField({ value, onChange, label = 'Imagem de capa' }: P
               Cancelar
             </button>
           </div>
+        </div>
+      )}
+
+      {mode === 'upload' && (
+        <div className="mt-2 space-y-2">
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragActive(true);
+            }}
+            onDragLeave={() => setDragActive(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragActive(false);
+              const file = e.dataTransfer.files?.[0];
+              if (file) handleFile(file);
+            }}
+            onClick={() => fileInputRef.current?.click()}
+            className={`flex flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed px-4 py-6 text-center cursor-pointer transition-colors ${
+              dragActive ? 'border-gray-500 bg-gray-50' : 'border-gray-300'
+            }`}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFile(file);
+              }}
+            />
+            <p className="text-sm text-gray-600">Arraste uma imagem aqui ou clique para selecionar</p>
+            <p className="text-xs text-gray-400">PNG, JPEG ou WEBP, até 5MB</p>
+            {pending && <p className="text-sm text-gray-500">Enviando...</p>}
+          </div>
+          <button
+            type="button"
+            onClick={() => setMode('idle')}
+            className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Cancelar
+          </button>
+          {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
       )}
     </div>
