@@ -40,5 +40,4 @@ export type SiteConfig = {
   siteName: string;
   domain: string;
   menu: { label: string; href: string }[];
-  categories: Category[];
 };

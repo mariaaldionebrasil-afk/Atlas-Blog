@@ -1,11 +1,17 @@
 import Link from "next/link";
 import type { SiteConfig } from "../lib/types";
+import { prisma } from "../lib/prisma";
 
 type Props = {
   config: SiteConfig;
 };
 
-export default function Footer({ config }: Props) {
+export default async function Footer({ config }: Props) {
+  const categories = await prisma.category.findMany({
+    select: { slug: true, name: true },
+    orderBy: { name: "asc" },
+  });
+
   return (
     <footer className="border-t border-gray-200 bg-gray-50 mt-16">
       <div className="mx-auto max-w-5xl px-4 py-10 grid grid-cols-1 gap-8 sm:grid-cols-3">
@@ -18,18 +24,22 @@ export default function Footer({ config }: Props) {
 
         <div>
           <p className="font-semibold text-gray-900 mb-3">Categorias</p>
-          <ul className="space-y-2">
-            {config.categories.map((cat) => (
-              <li key={cat.slug}>
-                <Link
-                  href={`/category/${cat.slug}`}
-                  className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
-                >
-                  {cat.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {categories.length > 0 ? (
+            <ul className="space-y-2">
+              {categories.map((cat) => (
+                <li key={cat.slug}>
+                  <Link
+                    href={`/category/${cat.slug}`}
+                    className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+                  >
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-400">Nenhuma categoria cadastrada ainda.</p>
+          )}
         </div>
 
         <div>

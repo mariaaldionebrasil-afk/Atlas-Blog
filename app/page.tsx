@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [dbPosts, dbReviews] = await Promise.all([
+  const [dbPosts, dbReviews, categories] = await Promise.all([
     prisma.post.findMany({
       where: { status: "PUBLISHED" },
       include: { author: true, category: true },
@@ -36,6 +36,7 @@ export default async function HomePage() {
       where: { status: "PUBLISHED" },
       include: { author: true },
     }),
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
   ]);
 
   const recentPosts = dbPosts.map(mapPost);
@@ -79,7 +80,11 @@ export default async function HomePage() {
             </div>
           </section>
 
-          <CategoryGrid categories={siteConfig.categories} />
+          {categories.length > 0 && (
+            <CategoryGrid
+              categories={categories.map((c) => ({ ...c, description: c.description ?? undefined }))}
+            />
+          )}
           <AboutTeaser siteName={siteConfig.siteName} />
         </div>
       </main>

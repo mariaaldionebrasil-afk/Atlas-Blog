@@ -1,5 +1,4 @@
 import type { SiteConfig } from "../lib/types";
-import { categories } from "../lib/mock-data";
 
 const siteConfig: SiteConfig = {
   siteName: "Atlas Blog Demo",
@@ -11,7 +10,6 @@ const siteConfig: SiteConfig = {
     { label: "About", href: "/about" },
     { label: "Contact", href: "/contact" },
   ],
-  categories,
 };
 
 export default siteConfig;
