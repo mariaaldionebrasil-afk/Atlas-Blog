@@ -157,7 +157,7 @@ export async function GET(request: Request) {
   ];
 
   const [posts, reviews, roundups] = await Promise.all([
-    prisma.post.updateMany({ where, data: { status: 'PUBLISHED' } }),
+    prisma.post.updateMany({ where, data: { status: 'PUBLISHED', publishedDate: now } }),
     prisma.review.updateMany({ where, data: { status: 'PUBLISHED' } }),
     prisma.roundup.updateMany({ where, data: { status: 'PUBLISHED' } }),
   ]);

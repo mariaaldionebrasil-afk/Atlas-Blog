@@ -5,11 +5,8 @@ const navItems = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/keywords', label: 'Keywords' },
   { href: '/admin/generate-structure', label: 'Gerar Estrutura' },
-  { href: '/admin/silos', label: 'Silos' },
-  { href: '/admin/queue', label: 'Fila' },
-  { href: '/admin/posts', label: 'Posts' },
-  { href: '/admin/reviews', label: 'Reviews' },
-  { href: '/admin/roundups', label: 'Roundups' },
+  { href: '/admin/creation-queue', label: 'Fila de Criação' },
+  { href: '/admin/publish-queue', label: 'Fila de Publicação' },
   { href: '/admin/categories', label: 'Categorias' },
   { href: '/admin/authors', label: 'Autores' },
 ];

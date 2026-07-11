@@ -20,11 +20,13 @@ model Author {
 }
 
 model Category {
-  id          String  @id @default(uuid())
-  slug        String  @unique
+  id          String    @id @default(uuid())
+  slug        String    @unique
   name        String
   description String?
   posts       Post[]
+  reviews     Review[]
+  roundups    Roundup[]
 }
 
 enum ContentStatus {
@@ -122,6 +124,8 @@ model Review {
   status                    ContentStatus       @default(DRAFT)
   author                    Author?             @relation(fields: [authorId], references: [id])
   authorId                  String?
+  category                  Category?           @relation(fields: [categoryId], references: [id])
+  categoryId                String?
   sourceUrls                Json?
   keyword                   Keyword?            @relation(fields: [keywordId], references: [id])
   keywordId                 String?
@@ -133,6 +137,7 @@ model Review {
   comparisonsAsA            Post[]              @relation("ComparisonA")
   comparisonsAsB            Post[]              @relation("ComparisonB")
   searchIntentFormat        String?
+  outline                   Json?
 }
 
 model Roundup {
@@ -146,6 +151,8 @@ model Roundup {
   scheduledDate      DateTime?
   author             Author?             @relation(fields: [authorId], references: [id])
   authorId           String?
+  category           Category?           @relation(fields: [categoryId], references: [id])
+  categoryId         String?
   items              RoundupItem[]
   createdAt          DateTime            @default(now())
   socialPublications SocialPublication[]
@@ -153,6 +160,7 @@ model Roundup {
   keywordId          String?
   keyword            Keyword?            @relation(fields: [keywordId], references: [id])
   searchIntentFormat String?
+  outline            Json?
 }
 
 model RoundupItem {
