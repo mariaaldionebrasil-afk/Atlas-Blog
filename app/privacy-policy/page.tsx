@@ -31,11 +31,18 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">2. Cookies</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">2. Cookies e Google Analytics</h2>
             <p>
               Este site utiliza cookies — pequenos arquivos de texto armazenados no seu navegador
               — para melhorar a experiência de navegação e para fins de análise de audiência.
               Ao continuar navegando neste site, você concorda com o uso de cookies.
+            </p>
+            <p className="mt-2">
+              Utilizamos o Google Analytics, um serviço de análise de audiência do Google LLC, que
+              usa cookies para coletar informações sobre como os visitantes utilizam o site
+              (páginas visitadas, tempo de permanência, origem do acesso, dispositivo, entre
+              outros). Essas informações são tratadas de forma agregada e usadas exclusivamente
+              para entender o comportamento de navegação e melhorar o conteúdo do site.
             </p>
             <p className="mt-2">
               Você pode configurar seu navegador para recusar cookies ou para alertá-lo quando
