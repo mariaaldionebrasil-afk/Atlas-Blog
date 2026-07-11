@@ -12,13 +12,16 @@ import { prisma } from "../lib/prisma";
 import { mapPost, mapReview, mapAuthor } from "../lib/mappers";
 import { JsonLd } from "../components/JsonLd";
 
+const HOMEPAGE_DESCRIPTION =
+  "Cursos gratuitos de bancos como Bradesco e Santander, dicas de carreira e crescimento pessoal. Conteúdo direto ao ponto, sem enrolação.";
+
 export const metadata: Metadata = {
   title: siteConfig.siteName,
-  description: "Conteúdo informacional, reviews e guias práticos para o seu dia a dia.",
+  description: HOMEPAGE_DESCRIPTION,
   alternates: { canonical: "/" },
   openGraph: {
     title: siteConfig.siteName,
-    description: "Conteúdo informacional, reviews e guias práticos para o seu dia a dia.",
+    description: HOMEPAGE_DESCRIPTION,
     url: "/",
     type: "website",
   },
@@ -57,8 +60,8 @@ export default async function HomePage() {
       <Header config={siteConfig} />
       <main className="flex-1">
         <HeroSection
-          title={siteConfig.siteName}
-          subtitle="Conteúdo informacional, reviews e guias práticos para o seu dia a dia."
+          title="Cursos Gratuitos e Dicas para Crescer na Carreira e na Vida"
+          subtitle="Conteúdo gratuito e direto ao ponto sobre cursos, oportunidades e desenvolvimento pessoal — pra você aproveitar o que os grandes bancos e instituições oferecem sem gastar nada."
         />
 
         <div className="mx-auto max-w-5xl px-4 py-12">

@@ -1,14 +1,14 @@
 import type { SiteConfig } from "../lib/types";
 
 const siteConfig: SiteConfig = {
-  siteName: "Atlas Blog Demo",
+  siteName: "Blog Vinícius Azevedo",
   domain: "drviniciusazevedo.com.br",
   menu: [
-    { label: "Home", href: "/" },
+    { label: "Início", href: "/" },
     { label: "Blog", href: "/blog" },
-    { label: "Reviews", href: "/reviews" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
+    { label: "Avaliações", href: "/reviews" },
+    { label: "Sobre", href: "/about" },
+    { label: "Contato", href: "/contact" },
   ],
 };
 
