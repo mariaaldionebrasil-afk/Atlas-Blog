@@ -4,10 +4,11 @@ import { prisma } from '../lib/prisma';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.SITE_URL!;
 
-  const [posts, reviews, roundups] = await Promise.all([
+  const [posts, reviews, roundups, categories] = await Promise.all([
     prisma.post.findMany({ where: { status: 'PUBLISHED' }, select: { slug: true, publishedDate: true } }),
     prisma.review.findMany({ where: { status: 'PUBLISHED' }, select: { slug: true } }),
     prisma.roundup.findMany({ where: { status: 'PUBLISHED' }, select: { slug: true, createdAt: true } }),
+    prisma.category.findMany({ select: { slug: true } }),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -16,7 +17,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/reviews` },
     { url: `${siteUrl}/about` },
     { url: `${siteUrl}/contact` },
+    { url: `${siteUrl}/privacy-policy` },
+    { url: `${siteUrl}/terms` },
   ];
+
+  const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => ({
+    url: `${siteUrl}/category/${c.slug}`,
+  }));
 
   const postRoutes: MetadataRoute.Sitemap = posts.map((p) => ({
     url: `${siteUrl}/post/${p.slug}`,
@@ -32,5 +39,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: r.createdAt,
   }));
 
-  return [...staticRoutes, ...postRoutes, ...reviewRoutes, ...roundupRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...postRoutes, ...reviewRoutes, ...roundupRoutes];
 }
