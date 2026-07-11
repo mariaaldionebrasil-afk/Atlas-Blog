@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { KeywordsPanel } from './KeywordsPanel';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminKeywordsPage() {
   const keywords = await prisma.keyword.findMany({
     include: { silo: true },

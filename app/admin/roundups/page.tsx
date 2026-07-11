@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { RoundupsPanel } from './RoundupsPanel';
 import { SocialPublishBadge } from '@/components/SocialPublishBadge';
 
+export const dynamic = 'force-dynamic';
+
 const statusLabel: Record<string, string> = {
   DRAFT: 'Rascunho',
   SCHEDULED: 'Agendado',

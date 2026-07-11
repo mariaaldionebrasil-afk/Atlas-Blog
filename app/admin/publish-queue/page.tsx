@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { PublishQueuePanel, type PublishItem, type PublishItemType } from './PublishQueuePanel';
 
+export const dynamic = 'force-dynamic';
+
 const TYPE_RANK: Record<PublishItemType, number> = {
   REVIEW: 0,
   ARTIGO_SILO: 1,

@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { SilosPanel, type SiloTreeNode } from './SilosPanel';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminSilosPage() {
   const pilares = await prisma.silo.findMany({
     where: { type: 'PILAR' },

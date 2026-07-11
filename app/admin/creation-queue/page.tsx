@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { CreationQueuePanel, type CreationItem, type ItemType } from './CreationQueuePanel';
 import type { OutlineTopic } from './actions';
 
+export const dynamic = 'force-dynamic';
+
 const TYPE_RANK: Record<ItemType, number> = {
   REVIEW: 0,
   ARTIGO_SILO: 1,

@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { QueuePanel, type QueuedPost } from './QueuePanel';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminQueuePage() {
   const draftPosts = await prisma.post.findMany({
     where: { status: 'DRAFT' },
