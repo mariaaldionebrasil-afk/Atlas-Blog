@@ -46,7 +46,7 @@ export default async function RoundupPage({ params }: Props) {
     where: { slug },
     include: {
       items: {
-        include: { review: true },
+        include: { review: true, post: true },
         orderBy: { position: "asc" },
       },
     },
@@ -55,7 +55,13 @@ export default async function RoundupPage({ params }: Props) {
   if (!roundup || roundup.status !== "PUBLISHED") notFound();
 
   const items = roundup.items;
-  const topPick = items[0]?.review;
+  const productItems = items.filter(
+    (i): i is typeof i & { review: NonNullable<(typeof i)["review"]> } => i.review !== null
+  );
+  const articleItems = items.filter(
+    (i): i is typeof i & { post: NonNullable<(typeof i)["post"]> } => i.post !== null
+  );
+  const topPick = productItems[0]?.review;
   const faq = (roundup.faq as unknown as Faq[] | null) ?? [];
 
   const crumbs = [
@@ -98,7 +104,7 @@ export default async function RoundupPage({ params }: Props) {
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {productItems.map((item) => (
                 <tr key={item.id} className="border-b border-gray-100">
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-3">
@@ -143,7 +149,7 @@ export default async function RoundupPage({ params }: Props) {
         </article>
 
         <div className="mt-10 space-y-12">
-          {items.map((item, index) => (
+          {productItems.map((item, index) => (
             <div key={item.id} className="rounded-lg border border-gray-200 bg-white p-5 sm:p-6">
               <h3 className="text-lg font-bold text-gray-900">
                 #{index + 1} {item.review.productName}
@@ -191,6 +197,21 @@ export default async function RoundupPage({ params }: Props) {
             </div>
           ))}
         </div>
+
+        {articleItems.length > 0 && (
+          <div className="mt-10">
+            <h2 className="mb-4 text-2xl font-bold text-gray-900">Artigos relacionados</h2>
+            <ul className="space-y-2">
+              {articleItems.map((item) => (
+                <li key={item.id}>
+                  <Link href={`/post/${item.post.slug}`} className="text-blue-600 hover:underline">
+                    {item.post.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {faq.length > 0 && (
           <div className="mt-10">

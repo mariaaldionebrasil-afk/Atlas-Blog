@@ -108,6 +108,7 @@ model Post {
   searchIntentFormat        String?
   roundupId                 String?
   roundup                   Roundup?            @relation(fields: [roundupId], references: [id])
+  roundupItems              RoundupItem[]
 }
 
 model Review {
@@ -167,8 +168,10 @@ model RoundupItem {
   id        String  @id @default(uuid())
   roundup   Roundup @relation(fields: [roundupId], references: [id])
   roundupId String
-  review    Review  @relation(fields: [reviewId], references: [id])
-  reviewId  String
+  review    Review? @relation(fields: [reviewId], references: [id])
+  reviewId  String?
+  post      Post?   @relation(fields: [postId], references: [id])
+  postId    String?
   position  Int
 }
 

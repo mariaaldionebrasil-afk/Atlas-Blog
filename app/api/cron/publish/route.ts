@@ -123,7 +123,7 @@ export async function GET(request: Request) {
         items: {
           orderBy: { position: 'asc' },
           take: 1,
-          select: { review: { select: { coverImage: true } } },
+          select: { review: { select: { coverImage: true } }, post: { select: { coverImage: true } } },
         },
       },
     }),
@@ -152,7 +152,7 @@ export async function GET(request: Request) {
       slug: r.slug,
       title: r.title,
       summary: r.snippet,
-      coverImage: r.items[0]?.review.coverImage ?? null,
+      coverImage: r.items[0]?.review?.coverImage ?? r.items[0]?.post?.coverImage ?? null,
     })),
   ];
 

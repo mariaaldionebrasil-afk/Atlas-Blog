@@ -20,7 +20,7 @@ export type CreationItem = {
   affiliateLinkMercadoLivre: string | null;
   comparedReviewIdA: string | null;
   comparedReviewIdB: string | null;
-  reviewIds: string[];
+  itemRefs: { kind: 'REVIEW' | 'POST'; id: string }[];
 };
 
 const kindLabel: Record<ItemType, string> = {

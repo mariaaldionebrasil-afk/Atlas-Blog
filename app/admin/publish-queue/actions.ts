@@ -27,13 +27,22 @@ export async function scheduleRoundupItem(roundupId: string, scheduledDate: stri
 
   const roundup = await prisma.roundup.findUnique({
     where: { id: roundupId },
-    include: { items: { include: { review: { select: { status: true, productName: true } } } } },
+    include: {
+      items: {
+        include: {
+          review: { select: { status: true, productName: true } },
+          post: { select: { status: true, title: true } },
+        },
+      },
+    },
   });
   if (!roundup) return { error: 'Artigo Silo não encontrado.' };
 
-  const notReady = roundup.items.filter((i) => i.review.status === 'DRAFT').map((i) => i.review.productName);
+  const notReady = roundup.items
+    .filter((i) => (i.review?.status ?? i.post!.status) === 'DRAFT')
+    .map((i) => i.review?.productName ?? i.post!.title);
   if (notReady.length > 0) {
-    return { error: `Agende primeiro os produtos: ${notReady.join(', ')}.` };
+    return { error: `Agende primeiro os itens: ${notReady.join(', ')}.` };
   }
 
   const result = await scheduleRoundupExisting(roundupId, scheduledDate);

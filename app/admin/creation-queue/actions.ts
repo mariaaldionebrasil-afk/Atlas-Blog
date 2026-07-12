@@ -199,19 +199,24 @@ export async function generateRoundupContent(roundupId: string): Promise<{ succe
 
   const roundup = await prisma.roundup.findUnique({
     where: { id: roundupId },
-    include: { items: { include: { review: true }, orderBy: { position: 'asc' } } },
+    include: { items: { include: { review: true, post: true }, orderBy: { position: 'asc' } } },
   });
   if (!roundup) return { error: 'Artigo Silo não encontrado.' };
-  if (roundup.items.length < 2) return { error: 'Selecione e salve ao menos 2 produtos antes de gerar o texto.' };
+  if (roundup.items.length < 2) return { error: 'Selecione e salve ao menos 2 itens antes de gerar o texto.' };
 
   const outline = (roundup.outline as unknown as OutlineTopic[] | null) ?? [];
-  const reviews = roundup.items.map((i) => i.review);
 
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_TEXT_API_KEY! });
 
-  const prompt = `Monte a introdução de um roundup ("${roundup.title}") a partir destes reviews já existentes:
+  const itemDescriptions = roundup.items.map((i) =>
+    i.review
+      ? `- produto: "${i.review.productName}" | nota: ${i.review.rating ?? '?'} | resumo: ${i.review.summary}`
+      : `- artigo: "${i.post!.title}"`
+  );
 
-${reviews.map((r) => `- produto: "${r.productName}" | nota: ${r.rating ?? '?'} | resumo: ${r.summary}`).join('\n')}
+  const prompt = `Monte a introdução de um roundup ("${roundup.title}") a partir destes itens já existentes:
+
+${itemDescriptions.join('\n')}
 ${outline.length > 0 ? `\nCubra estes tópicos na introdução: ${outline.map((t) => t.text).join('; ')}.` : ''}
 
 Gere:
@@ -255,13 +260,28 @@ Responda em JSON.`;
   return { success: true };
 }
 
-export async function getSiloReviewOptions(siloId: string) {
+export type SiloItemOption = { id: string; title: string; kind: 'REVIEW' | 'POST'; status: string };
+
+export async function getSiloItemOptions(siloId: string): Promise<SiloItemOption[]> {
   await requireAdmin();
-  return prisma.review.findMany({
-    where: { keyword: { siloId } },
-    select: { id: true, productName: true, status: true },
-    orderBy: { productName: 'asc' },
-  });
+
+  const [reviews, posts] = await Promise.all([
+    prisma.review.findMany({
+      where: { keyword: { siloId } },
+      select: { id: true, productName: true, status: true },
+      orderBy: { productName: 'asc' },
+    }),
+    prisma.post.findMany({
+      where: { keyword: { siloId }, postType: 'INFORMACIONAL' },
+      select: { id: true, title: true, status: true },
+      orderBy: { title: 'asc' },
+    }),
+  ]);
+
+  return [
+    ...reviews.map((r): SiloItemOption => ({ id: r.id, title: r.productName, kind: 'REVIEW', status: r.status })),
+    ...posts.map((p): SiloItemOption => ({ id: p.id, title: p.title, kind: 'POST', status: p.status })),
+  ];
 }
 
 export async function saveReviewMeta(input: {
@@ -297,15 +317,15 @@ export async function saveRoundupMeta(input: {
   id: string;
   categoryId: string;
   authorId: string;
-  reviewIds: string[];
+  itemRefs: { kind: 'REVIEW' | 'POST'; id: string }[];
 }): Promise<{ success?: true; error?: string }> {
   await requireAdmin();
 
-  if (input.reviewIds.length === 0) {
-    return { error: 'Selecione ao menos 1 produto.' };
+  if (input.itemRefs.length === 0) {
+    return { error: 'Selecione ao menos 1 item.' };
   }
-  if (input.reviewIds.length > 15) {
-    return { error: 'No máximo 15 produtos por Artigo Silo.' };
+  if (input.itemRefs.length > 15) {
+    return { error: 'No máximo 15 itens por Artigo Silo.' };
   }
 
   await prisma.roundup.update({
@@ -315,7 +335,12 @@ export async function saveRoundupMeta(input: {
 
   await prisma.roundupItem.deleteMany({ where: { roundupId: input.id } });
   await prisma.roundupItem.createMany({
-    data: input.reviewIds.map((reviewId, index) => ({ roundupId: input.id, reviewId, position: index })),
+    data: input.itemRefs.map((ref, index) => ({
+      roundupId: input.id,
+      reviewId: ref.kind === 'REVIEW' ? ref.id : null,
+      postId: ref.kind === 'POST' ? ref.id : null,
+      position: index,
+    })),
   });
 
   revalidatePath('/admin/creation-queue');

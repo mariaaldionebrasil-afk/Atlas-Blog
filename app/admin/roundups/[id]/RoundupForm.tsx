@@ -8,10 +8,10 @@ import type { ContentStatus } from '@/lib/generated/prisma/enums';
 
 export type RoundupItemView = {
   id: string;
-  reviewId: string;
-  productName: string;
+  kind: 'REVIEW' | 'POST';
+  refId: string;
+  title: string;
   rating: number | null;
-  reviewSlug: string;
 };
 
 type Props = {
@@ -148,14 +148,16 @@ export function RoundupForm({ roundupId, status, title: initialTitle, slug: init
             <div key={item.id} className="flex items-center gap-3 rounded-md border border-gray-100 px-3 py-2">
               <span className="w-6 text-sm font-semibold text-gray-400">#{index + 1}</span>
               <div className="flex-1 text-sm">
-                <span className="font-medium text-gray-900">{item.productName}</span>{' '}
-                <span className="text-gray-500">({item.rating != null ? `${item.rating}/5` : 'sem nota'})</span>
+                <span className="font-medium text-gray-900">{item.title}</span>{' '}
+                {item.kind === 'REVIEW' && (
+                  <span className="text-gray-500">({item.rating != null ? `${item.rating}/5` : 'sem nota'})</span>
+                )}
               </div>
               <Link
-                href={`/admin/reviews/${item.reviewId}`}
+                href={item.kind === 'REVIEW' ? `/admin/reviews/${item.refId}` : `/admin/posts/${item.refId}`}
                 className="text-xs font-medium text-blue-600 hover:underline"
               >
-                Ver review
+                {item.kind === 'REVIEW' ? 'Ver review' : 'Ver artigo'}
               </Link>
               <button type="button" onClick={() => moveItem(index, -1)} className="text-gray-400 hover:text-gray-700">
                 ↑

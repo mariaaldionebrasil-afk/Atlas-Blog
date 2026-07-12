@@ -51,6 +51,20 @@ export function GenerateStructurePanel() {
     setProposal((prev) => (prev ? { ...prev, items: prev.items.filter((_, i) => i !== index) } : prev));
   }
 
+  function addItem() {
+    setProposal((prev) =>
+      prev
+        ? {
+            ...prev,
+            items: [
+              ...prev.items,
+              { type: 'INFORMACIONAL', title: '', keyword: '', searchIntentFormat: 'paragrafo_direto' },
+            ],
+          }
+        : prev
+    );
+  }
+
   async function handleApprove() {
     if (!proposal) return;
     setSavePending(true);
@@ -115,9 +129,12 @@ export function GenerateStructurePanel() {
                   onChange={(e) => updateItem(index, { title: e.target.value })}
                   className="flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-gray-500 focus:outline-none"
                 />
-                <span className="w-40 shrink-0 truncate text-xs text-gray-400" title={item.keyword}>
-                  {item.keyword}
-                </span>
+                <input
+                  value={item.keyword}
+                  onChange={(e) => updateItem(index, { keyword: e.target.value })}
+                  placeholder="keyword"
+                  className="w-40 shrink-0 rounded-md border border-gray-300 px-2 py-1.5 text-xs focus:border-gray-500 focus:outline-none"
+                />
                 <button type="button" onClick={() => removeItem(index)} className="text-red-500 hover:text-red-700">
                   ✕
                 </button>
@@ -127,12 +144,22 @@ export function GenerateStructurePanel() {
 
           <button
             type="button"
-            onClick={handleApprove}
-            disabled={savePending}
-            className="mt-4 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+            onClick={addItem}
+            className="mt-3 text-sm font-medium text-blue-600 hover:underline"
           >
-            {savePending ? 'Salvando...' : 'Aprovar e salvar estrutura'}
+            + Adicionar item
           </button>
+
+          <div>
+            <button
+              type="button"
+              onClick={handleApprove}
+              disabled={savePending}
+              className="mt-4 rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+            >
+              {savePending ? 'Salvando...' : 'Aprovar e salvar estrutura'}
+            </button>
+          </div>
         </div>
       )}
     </div>

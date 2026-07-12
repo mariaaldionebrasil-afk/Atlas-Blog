@@ -10,10 +10,11 @@ import {
   saveItemOutline,
   generateReviewForSkeleton,
   generateRoundupContent,
-  getSiloReviewOptions,
+  getSiloItemOptions,
   saveReviewMeta,
   saveRoundupMeta,
   savePostMeta,
+  type SiloItemOption,
 } from './actions';
 import { generateFullArticle } from '../posts/generateArticleAction';
 
@@ -40,8 +41,9 @@ export function CreationItemForm({ item, categories, authors }: Props) {
   const [affiliateLinkMercadoLivre, setAffiliateLinkMercadoLivre] = useState(item.affiliateLinkMercadoLivre ?? '');
   const [comparedReviewIdA, setComparedReviewIdA] = useState(item.comparedReviewIdA ?? '');
   const [comparedReviewIdB, setComparedReviewIdB] = useState(item.comparedReviewIdB ?? '');
-  const [selectedReviewIds, setSelectedReviewIds] = useState<string[]>(item.reviewIds);
-  const [siloReviews, setSiloReviews] = useState<{ id: string; productName: string; status: string }[]>([]);
+  const [selectedItemRefs, setSelectedItemRefs] = useState<{ kind: 'REVIEW' | 'POST'; id: string }[]>(item.itemRefs);
+  const [siloItems, setSiloItems] = useState<SiloItemOption[]>([]);
+  const siloReviewsOnly = siloItems.filter((i) => i.kind === 'REVIEW');
 
   const [generatingOutline, setGeneratingOutline] = useState(false);
   const [generatingContent, setGeneratingContent] = useState(false);
@@ -53,7 +55,7 @@ export function CreationItemForm({ item, categories, authors }: Props) {
 
   useEffect(() => {
     if (needsProductSelector && item.siloId) {
-      getSiloReviewOptions(item.siloId).then(setSiloReviews);
+      getSiloItemOptions(item.siloId).then(setSiloItems);
     }
   }, [needsProductSelector, item.siloId]);
 
@@ -107,7 +109,7 @@ export function CreationItemForm({ item, categories, authors }: Props) {
             affiliateLinkMercadoLivre,
           })
         : item.kind === 'ARTIGO_SILO'
-          ? await saveRoundupMeta({ id: item.id, categoryId, authorId, reviewIds: selectedReviewIds })
+          ? await saveRoundupMeta({ id: item.id, categoryId, authorId, itemRefs: selectedItemRefs })
           : await savePostMeta({
               id: item.id,
               categoryId,
@@ -127,9 +129,11 @@ export function CreationItemForm({ item, categories, authors }: Props) {
     setMessage('Salvo com sucesso.');
   }
 
-  function toggleReview(reviewId: string) {
-    setSelectedReviewIds((prev) =>
-      prev.includes(reviewId) ? prev.filter((id) => id !== reviewId) : [...prev, reviewId]
+  function toggleItem(kind: 'REVIEW' | 'POST', id: string) {
+    setSelectedItemRefs((prev) =>
+      prev.some((ref) => ref.kind === kind && ref.id === id)
+        ? prev.filter((ref) => !(ref.kind === kind && ref.id === id))
+        : [...prev, { kind, id }]
     );
   }
 
@@ -179,13 +183,24 @@ export function CreationItemForm({ item, categories, authors }: Props) {
 
       {item.kind === 'ARTIGO_SILO' && (
         <div>
-          <label className="block text-sm font-medium text-gray-700">Produtos incluídos (1 a 15)</label>
+          <label className="block text-sm font-medium text-gray-700">Itens incluídos (1 a 15)</label>
           <div className="mt-1 max-h-48 space-y-1 overflow-y-auto rounded-md border border-gray-200 p-2">
-            {siloReviews.length === 0 && <p className="text-sm text-gray-400">Nenhum produto no mesmo silo ainda.</p>}
-            {siloReviews.map((r) => (
-              <label key={r.id} className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={selectedReviewIds.includes(r.id)} onChange={() => toggleReview(r.id)} />
-                {r.productName}
+            {siloItems.length === 0 && <p className="text-sm text-gray-400">Nenhum item no mesmo silo ainda.</p>}
+            {siloItems.map((i) => (
+              <label key={`${i.kind}-${i.id}`} className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={selectedItemRefs.some((ref) => ref.kind === i.kind && ref.id === i.id)}
+                  onChange={() => toggleItem(i.kind, i.id)}
+                />
+                <span
+                  className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                    i.kind === 'REVIEW' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  {i.kind === 'REVIEW' ? 'Produto' : 'Artigo'}
+                </span>
+                {i.title}
               </label>
             ))}
           </div>
@@ -202,9 +217,9 @@ export function CreationItemForm({ item, categories, authors }: Props) {
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
             >
               <option value="">Selecione</option>
-              {siloReviews.map((r) => (
+              {siloReviewsOnly.map((r) => (
                 <option key={r.id} value={r.id}>
-                  {r.productName}
+                  {r.title}
                 </option>
               ))}
             </select>
@@ -217,9 +232,9 @@ export function CreationItemForm({ item, categories, authors }: Props) {
               className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-gray-500 focus:outline-none"
             >
               <option value="">Selecione</option>
-              {siloReviews.map((r) => (
+              {siloReviewsOnly.map((r) => (
                 <option key={r.id} value={r.id}>
-                  {r.productName}
+                  {r.title}
                 </option>
               ))}
             </select>

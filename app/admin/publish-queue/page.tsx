@@ -23,7 +23,13 @@ export default async function AdminPublishQueuePage() {
         category: true,
         author: true,
         keyword: { include: { silo: true } },
-        items: { include: { review: { select: { status: true, productName: true } } }, orderBy: { position: 'asc' } },
+        items: {
+          include: {
+            review: { select: { status: true, productName: true } },
+            post: { select: { status: true, title: true } },
+          },
+          orderBy: { position: 'asc' },
+        },
       },
     }),
     prisma.post.findMany({
@@ -59,7 +65,10 @@ export default async function AdminPublishQueuePage() {
         siloName: r.keyword?.silo?.name ?? 'Sem silo',
         categoryName: r.category?.name ?? '—',
         authorName: r.author?.name ?? '—',
-        dependencies: r.items.map((i) => ({ label: i.review.productName, ready: i.review.status !== 'DRAFT' })),
+        dependencies: r.items.map((i) => ({
+          label: i.review?.productName ?? i.post!.title,
+          ready: (i.review?.status ?? i.post!.status) !== 'DRAFT',
+        })),
       })
     ),
     ...readyPosts.map((p): PublishItem => {

@@ -105,6 +105,13 @@ export async function approveStructure(proposal: StructureProposal): Promise<voi
       },
     });
 
+    let position = 0;
+    for (const reviewId of reviewIdByItemKeyword.values()) {
+      await tx.roundupItem.create({
+        data: { roundupId: roundup.id, reviewId, position: position++ },
+      });
+    }
+
     for (const item of proposal.items.filter(
       (i): i is StructureItem & { type: 'APOIO' | 'INFORMACIONAL' | 'COMPARACAO' } =>
         i.type === 'APOIO' || i.type === 'INFORMACIONAL' || i.type === 'COMPARACAO'
@@ -119,7 +126,7 @@ export async function approveStructure(proposal: StructureProposal): Promise<voi
           ? reviewIdByItemKeyword.get(item.comparedProducts[1])
           : undefined;
 
-      await tx.post.create({
+      const post = await tx.post.create({
         data: {
           slug,
           title: item.title,
@@ -134,6 +141,12 @@ export async function approveStructure(proposal: StructureProposal): Promise<voi
           status: 'DRAFT',
         },
       });
+
+      if (item.type === 'INFORMACIONAL') {
+        await tx.roundupItem.create({
+          data: { roundupId: roundup.id, postId: post.id, position: position++ },
+        });
+      }
     }
   }, { timeout: 30000 });
 

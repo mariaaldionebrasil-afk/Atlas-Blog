@@ -13,7 +13,10 @@ export default async function AdminRoundupEditPage({ params }: Props) {
     where: { id },
     include: {
       items: {
-        include: { review: { select: { id: true, productName: true, rating: true, slug: true } } },
+        include: {
+          review: { select: { id: true, productName: true, rating: true } },
+          post: { select: { id: true, title: true } },
+        },
         orderBy: { position: 'asc' },
       },
     },
@@ -21,13 +24,11 @@ export default async function AdminRoundupEditPage({ params }: Props) {
 
   if (!roundup) notFound();
 
-  const items: RoundupItemView[] = roundup.items.map((item) => ({
-    id: item.id,
-    reviewId: item.review.id,
-    productName: item.review.productName,
-    rating: item.review.rating,
-    reviewSlug: item.review.slug,
-  }));
+  const items: RoundupItemView[] = roundup.items.map((item) =>
+    item.review
+      ? { id: item.id, kind: 'REVIEW' as const, refId: item.review.id, title: item.review.productName, rating: item.review.rating }
+      : { id: item.id, kind: 'POST' as const, refId: item.post!.id, title: item.post!.title, rating: null }
+  );
 
   return (
     <div className="p-8">

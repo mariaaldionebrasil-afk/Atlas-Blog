@@ -45,7 +45,7 @@ export default async function AdminCreationQueuePage() {
       affiliateLinkMercadoLivre: r.affiliateLinkMercadoLivre,
       comparedReviewIdA: null,
       comparedReviewIdB: null,
-      reviewIds: [],
+      itemRefs: [],
     })),
     ...pendingRoundups.map((r): CreationItem => ({
       kind: 'ARTIGO_SILO',
@@ -61,7 +61,9 @@ export default async function AdminCreationQueuePage() {
       affiliateLinkMercadoLivre: null,
       comparedReviewIdA: null,
       comparedReviewIdB: null,
-      reviewIds: r.items.map((i) => i.reviewId),
+      itemRefs: r.items.map((i) =>
+        i.reviewId ? { kind: 'REVIEW' as const, id: i.reviewId } : { kind: 'POST' as const, id: i.postId! }
+      ),
     })),
     ...pendingPosts.map((p): CreationItem => ({
       kind: p.postType as ItemType,
@@ -77,7 +79,7 @@ export default async function AdminCreationQueuePage() {
       affiliateLinkMercadoLivre: p.affiliateLinkMercadoLivre,
       comparedReviewIdA: p.comparedReviewIdA,
       comparedReviewIdB: p.comparedReviewIdB,
-      reviewIds: [],
+      itemRefs: [],
     })),
   ].sort((a, b) => {
     if (a.siloName !== b.siloName) return a.siloName.localeCompare(b.siloName);
