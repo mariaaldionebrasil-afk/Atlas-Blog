@@ -59,9 +59,14 @@ export async function schedulePostItem(postId: string, scheduledDate: string) {
       comparedReviewA: { select: { status: true, productName: true } },
       comparedReviewB: { select: { status: true, productName: true } },
       roundup: { select: { status: true, title: true } },
+      roundupItems: { select: { roundupId: true } },
     },
   });
   if (!post) return { error: 'Post não encontrado.' };
+
+  // Um Post INFORMACIONAL que é ele mesmo um satélite (RoundupItem) do seu Artigo Silo
+  // é "upstream" (equivalente a Review) — é o Silo que espera por ele, não o contrário.
+  const isUpstreamSatellite = post.roundupItems.some((ri) => ri.roundupId === post.roundupId);
 
   if (post.postType === 'COMPARACAO') {
     const missing = [post.comparedReviewA, post.comparedReviewB]
@@ -70,7 +75,7 @@ export async function schedulePostItem(postId: string, scheduledDate: string) {
     if (missing.length > 0) {
       return { error: `Agende primeiro os produtos comparados: ${missing.join(', ')}.` };
     }
-  } else if ((post.postType === 'APOIO' || post.postType === 'INFORMACIONAL') && post.roundup) {
+  } else if ((post.postType === 'APOIO' || post.postType === 'INFORMACIONAL') && post.roundup && !isUpstreamSatellite) {
     if (post.roundup.status === 'DRAFT') {
       return { error: `Agende primeiro o Artigo Silo "${post.roundup.title}".` };
     }
