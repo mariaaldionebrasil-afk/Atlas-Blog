@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.SITE_URL!),
   title: "Atlas Blog Demo",
   description: "Blog de conteúdo informacional, reviews e guias práticos.",
+  verification: {
+    google: "qnRHe6hjtZ4iqb5LNjJUxBPp7MLsybb_NbFEQg8Hwmw",
+  },
 };
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
