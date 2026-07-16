@@ -41,6 +41,7 @@ export default async function AdminPublishQueuePage() {
         comparedReviewA: { select: { status: true, productName: true } },
         comparedReviewB: { select: { status: true, productName: true } },
         roundup: { select: { status: true, title: true } },
+        roundupItems: { select: { roundupId: true } },
       },
     }),
   ]);
@@ -72,12 +73,13 @@ export default async function AdminPublishQueuePage() {
       })
     ),
     ...readyPosts.map((p): PublishItem => {
+      const isUpstreamSatellite = p.roundupItems.some((ri) => ri.roundupId === p.roundupId);
       const dependencies =
         p.postType === 'COMPARACAO'
           ? [p.comparedReviewA, p.comparedReviewB]
               .filter((r) => r !== null)
               .map((r) => ({ label: r.productName, ready: r.status !== 'DRAFT' }))
-          : p.roundup
+          : p.roundup && !isUpstreamSatellite
             ? [{ label: p.roundup.title, ready: p.roundup.status !== 'DRAFT' }]
             : [];
 
