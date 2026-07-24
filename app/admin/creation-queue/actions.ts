@@ -214,6 +214,11 @@ export async function generateRoundupContent(roundupId: string): Promise<{ succe
       : `- artigo: "${i.post!.title}"`
   );
 
+  const hasProducts = roundup.items.some((i) => i.review !== null);
+  const introInstruction = hasProducts
+    ? 'introContent: texto de introdução sobre a categoria de produto, 2 a 4 parágrafos separados por uma linha em branco'
+    : 'introContent: texto de introdução para um hub de conteúdo informacional (SEM nenhum produto ou marca à venda nesta lista — não mencione comparação de preços, "melhores produtos" ou qualquer linguagem de compra/afiliado), 2 a 4 parágrafos separados por uma linha em branco';
+
   const prompt = `Monte a introdução de um roundup ("${roundup.title}") a partir destes itens já existentes:
 
 ${itemDescriptions.join('\n')}
@@ -221,7 +226,7 @@ ${outline.length > 0 ? `\nCubra estes tópicos na introdução: ${outline.map((t
 
 Gere:
 - snippet: meta description curta (1-2 frases) para o Google
-- introContent: texto de introdução sobre a categoria de produto, 2 a 4 parágrafos separados por uma linha em branco
+- ${introInstruction}
 
 Responda em JSON.`;
 
