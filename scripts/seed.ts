@@ -38,7 +38,7 @@ async function main() {
 
   console.log("Inserindo posts...");
   for (const post of posts) {
-    const dbAuthor = await prisma.author.findUniqueOrThrow({ where: { slug: post.author.slug } });
+    const dbAuthor = await prisma.author.findUniqueOrThrow({ where: { slug: post.author!.slug } });
     const dbCategory = await prisma.category.findUniqueOrThrow({ where: { slug: post.category } });
     await prisma.post.create({
       data: {

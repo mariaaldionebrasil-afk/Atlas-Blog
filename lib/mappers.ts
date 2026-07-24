@@ -25,10 +25,10 @@ export function mapPost(p: PrismaPost): Post {
     title: p.title,
     excerpt: p.excerpt,
     content: p.content,
-    category: p.category!.slug,
-    publishedDate: p.publishedDate!.toISOString().split("T")[0],
+    category: p.category?.slug,
+    publishedDate: p.publishedDate ? p.publishedDate.toISOString().split("T")[0] : "",
     coverImage: p.coverImage ?? undefined,
-    author: mapAuthor(p.author!),
+    author: p.author ? mapAuthor(p.author) : undefined,
   };
 }
 
