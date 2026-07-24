@@ -80,15 +80,17 @@ export default async function PostPage({ params }: Props) {
           description: post.excerpt,
           image: post.coverImage,
           datePublished: post.publishedDate,
-          author: { "@type": "Person", name: post.author.name },
+          author: post.author ? { "@type": "Person", name: post.author.name } : undefined,
         }}
       />
       <Header config={siteConfig} />
       <main className="flex-1 mx-auto max-w-3xl px-4 py-10 w-full">
         <Breadcrumb crumbs={crumbs} />
-        <span className="mt-4 inline-block text-xs font-medium uppercase tracking-wide text-blue-600">
-          {post.category}
-        </span>
+        {post.category && (
+          <span className="mt-4 inline-block text-xs font-medium uppercase tracking-wide text-blue-600">
+            {post.category}
+          </span>
+        )}
         <h1 className="mt-2 text-3xl font-bold text-gray-900 leading-tight">{post.title}</h1>
         <time className="mt-2 block text-sm text-gray-400">{post.publishedDate}</time>
         <p className="mt-4 text-lg text-gray-600 border-l-4 border-blue-200 pl-4 italic">{post.excerpt}</p>
@@ -122,7 +124,7 @@ export default async function PostPage({ params }: Props) {
           </div>
         )}
 
-        <AuthorBio author={post.author} />
+        {post.author && <AuthorBio author={post.author} />}
       </main>
       <Footer config={siteConfig} />
     </>

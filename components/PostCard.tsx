@@ -8,9 +8,11 @@ type Props = {
 export default function PostCard({ post }: Props) {
   return (
     <article className="border border-gray-200 rounded-lg p-5 hover:shadow-md transition-shadow bg-white">
-      <span className="text-xs font-medium uppercase tracking-wide text-blue-600">
-        {post.category}
-      </span>
+      {post.category && (
+        <span className="text-xs font-medium uppercase tracking-wide text-blue-600">
+          {post.category}
+        </span>
+      )}
       <h3 className="mt-2 text-lg font-semibold text-gray-900 leading-snug">
         <Link href={`/post/${post.slug}`} className="hover:underline">
           {post.title}

@@ -10,10 +10,10 @@ export type Post = {
   title: string;
   excerpt: string;
   content: string;
-  category: string;
+  category?: string;
   publishedDate: string;
   coverImage?: string;
-  author: Author;
+  author?: Author;
 };
 
 export type Review = {
