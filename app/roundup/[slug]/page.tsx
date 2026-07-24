@@ -205,15 +205,24 @@ export default async function RoundupPage({ params }: Props) {
         {articleItems.length > 0 && (
           <div className="mt-10">
             <h2 className="mb-4 text-2xl font-bold text-gray-900">Artigos relacionados</h2>
-            <ul className="space-y-2">
+            <div className="space-y-4">
               {articleItems.map((item) => (
-                <li key={item.id}>
-                  <Link href={`/post/${item.post.slug}`} className="text-blue-600 hover:underline">
-                    {item.post.title}
+                <div key={item.id} className="rounded-lg border border-gray-200 bg-white p-5">
+                  <h3 className="text-lg font-bold text-gray-900">
+                    <Link href={`/post/${item.post.slug}`} className="hover:underline">
+                      {item.post.title}
+                    </Link>
+                  </h3>
+                  <p className="mt-2 text-sm text-gray-600">{item.post.excerpt}</p>
+                  <Link
+                    href={`/post/${item.post.slug}`}
+                    className="mt-3 inline-block text-sm font-medium text-blue-600 hover:underline"
+                  >
+                    Ler artigo completo →
                   </Link>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
